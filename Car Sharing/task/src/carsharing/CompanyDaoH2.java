@@ -6,7 +6,6 @@ import java.util.List;
 
 public class CompanyDaoH2 implements CompanyDao {
 
-    private static final String TABLE_NAME = "COMPANY";
     private PreparedStatement getCompaniesStmt;
     private PreparedStatement insertCompanyStmt;
     private final Object insertLock = new Object();
@@ -19,7 +18,7 @@ public class CompanyDaoH2 implements CompanyDao {
 
     private static void createTable(Connection conn) {
         try {
-            conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
+            conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS COMPANY(" +
                                                          "ID INT PRIMARY KEY AUTO_INCREMENT," +
                                                          "NAME VARCHAR NOT NULL UNIQUE);"
             );
@@ -40,8 +39,8 @@ public class CompanyDaoH2 implements CompanyDao {
     }
 
     private void prepareStatements(Connection conn) throws SQLException {
-        getCompaniesStmt = conn.prepareStatement("SELECT ID, NAME FROM " + TABLE_NAME + ";");
-        insertCompanyStmt = conn.prepareStatement("INSERT INTO " + TABLE_NAME + "(NAME) VALUES(?)");
+        getCompaniesStmt = conn.prepareStatement("SELECT ID, NAME FROM COMPANY;");
+        insertCompanyStmt = conn.prepareStatement("INSERT INTO COMPANY(NAME) VALUES(?)");
     }
 
     @Override
