@@ -12,10 +12,9 @@ public class Controller {
     }
 
     public void programLoop() {
-        State state = stateMachine.changeState(0);
-        while (state != State.EXIT) {
-            final int input = cli.execStateAction(state);
-            state = stateMachine.changeState(input);
+        int input = 0;
+        while (stateMachine.goingOn()) {
+            input = cli.execStateAction(stateMachine.switchState(input));
         }
     }
 }

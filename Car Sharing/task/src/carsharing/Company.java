@@ -8,6 +8,11 @@ public class Company {
         this.name = name;
     }
 
+    public Company(int id, String name) {
+        this(name);
+        this.id = id;
+    }
+
     public void setId(int id) {
         this.id = id;
     }

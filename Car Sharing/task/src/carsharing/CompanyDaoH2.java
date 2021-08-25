@@ -7,6 +7,9 @@ import java.util.List;
 public class CompanyDaoH2 implements CompanyDao {
 
     private static final String TABLE_NAME = "COMPANY";
+    private PreparedStatement getCompaniesStmt;
+    private PreparedStatement insertCompanyStmt;
+    private final Object insertLock = new Object();
     private Connection conn;
 
     private static Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
@@ -16,10 +19,9 @@ public class CompanyDaoH2 implements CompanyDao {
 
     private static void createTable(Connection conn) {
         try {
-            final Statement stmt = conn.createStatement();
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
-                                       "ID INT PRIMARY KEY AUTO_INCREMENT," +
-                                       "NAME VARCHAR NOT NULL UNIQUE);"
+            conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" +
+                                                         "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                                                         "NAME VARCHAR NOT NULL UNIQUE);"
             );
         } catch (SQLException e) {
             e.printStackTrace();
@@ -31,24 +33,41 @@ public class CompanyDaoH2 implements CompanyDao {
             conn = createConnection(dbName);
             conn.setAutoCommit(true);
             createTable(conn);
+            prepareStatements(conn);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
     }
 
+    private void prepareStatements(Connection conn) throws SQLException {
+        getCompaniesStmt = conn.prepareStatement("SELECT ID, NAME FROM " + TABLE_NAME + ";");
+        insertCompanyStmt = conn.prepareStatement("INSERT INTO " + TABLE_NAME + "(NAME) VALUES(?)");
+    }
+
     @Override
     public List<Company> getAllCompanies() {
         List<Company> list = new LinkedList<>();
-
-        // TODO: Query the DB and map results to the list
-
+        try {
+            final ResultSet resultSet = getCompaniesStmt.executeQuery();
+            while (resultSet.next()) {
+                list.add(new Company(resultSet.getInt("ID"), resultSet.getString("NAME")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
     @Override
     public void saveCompany(Company company) {
-
-        // TODO: insert a new record
+        synchronized (insertLock) {
+            try {
+                insertCompanyStmt.setString(1, company.getName());
+                insertCompanyStmt.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

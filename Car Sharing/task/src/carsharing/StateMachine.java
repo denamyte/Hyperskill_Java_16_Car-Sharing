@@ -4,7 +4,7 @@ public class StateMachine {
 
     private State state = State.INITIAL;
 
-    public State changeState(int input) {
+    public State switchState(int input) {
         switch (state) {
 
             case INITIAL:
@@ -26,5 +26,9 @@ public class StateMachine {
                 break;
         }
         return state;
+    }
+
+    public boolean goingOn() {
+        return state != State.EXIT;
     }
 }
