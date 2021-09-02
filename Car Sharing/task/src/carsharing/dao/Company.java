@@ -1,4 +1,4 @@
-package carsharing;
+package carsharing.dao;
 
 public class Company {
     private int id;

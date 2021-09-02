@@ -1,4 +1,4 @@
-package carsharing;
+package carsharing.dao;
 
 import java.util.List;
 

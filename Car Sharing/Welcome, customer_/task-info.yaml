@@ -810,7 +810,7 @@ files:
             output = program.execute("2");
 
             if (!output.contains("You've returned a rented car!")) {
-                return wrong("If a customer has already rented a car and is trying to rent another one you should print 'You've already rented a car!'");
+                return wrong("If a customer has already returned a rented car and is trying to return another one you should print 'You've returned a rented car!'");
             }
 
             db.checkCustomer("First customer", null);

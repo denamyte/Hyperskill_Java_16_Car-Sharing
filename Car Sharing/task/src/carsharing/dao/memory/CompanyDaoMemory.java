@@ -1,4 +1,7 @@
-package carsharing;
+package carsharing.dao.memory;
+
+import carsharing.dao.Company;
+import carsharing.dao.CompanyDao;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

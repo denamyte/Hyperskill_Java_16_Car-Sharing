@@ -1,44 +1,34 @@
-package carsharing;
+package carsharing.dao.h2;
+
+import carsharing.dao.JDBCDao;
+import carsharing.dao.Company;
+import carsharing.dao.CompanyDao;
 
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CompanyDaoH2 implements CompanyDao {
+public class CompanyDaoH2 extends JDBCDao implements CompanyDao {
 
     private PreparedStatement getCompaniesStmt;
     private PreparedStatement insertCompanyStmt;
     private final Object insertLock = new Object();
-    private Connection conn;
 
-    private static Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
-        Class.forName ("org.h2.Driver");
-        return DriverManager.getConnection("jdbc:h2:./src/carsharing/db/" + dbName);
+
+    public CompanyDaoH2(Connection conn) {
+        super(conn);
     }
 
-    private static void createTable(Connection conn) {
-        try {
-            conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS COMPANY(" +
-                                                         "ID INT PRIMARY KEY AUTO_INCREMENT," +
-                                                         "NAME VARCHAR NOT NULL UNIQUE);"
-            );
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    @Override
+    protected void createTable(Connection conn) throws SQLException {
+        conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS COMPANY(" +
+                                                     "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                                                     "NAME VARCHAR NOT NULL UNIQUE);"
+        );
     }
 
-    public CompanyDaoH2(String dbName) {
-        try {
-            conn = createConnection(dbName);
-            conn.setAutoCommit(true);
-            createTable(conn);
-            prepareStatements(conn);
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void prepareStatements(Connection conn) throws SQLException {
+    @Override
+    protected void prepareStatements(Connection conn) throws SQLException {
         getCompaniesStmt = conn.prepareStatement("SELECT ID, NAME FROM COMPANY;");
         insertCompanyStmt = conn.prepareStatement("INSERT INTO COMPANY(NAME) VALUES(?)");
     }
