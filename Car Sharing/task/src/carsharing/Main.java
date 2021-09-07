@@ -13,6 +13,8 @@ public class Main {
 
     private static final String DEFAULT_DB_NAME = "carsharing";
 
+    // TODO: 9/7/21 Implement new StateMachineFactory;
+    //
     public static void main(String[] args) {
 
 //        CarSharingCLI cli = getMemoryImpl();
@@ -21,12 +23,6 @@ public class Main {
         StateMachine stateMachine = new StateMachine();
         Controller controller = new Controller(cli, stateMachine);
         controller.programLoop();
-    }
-
-    private static String getDBName(String[] args) {
-        return args.length >= 2 && args[0].equals("-databaseFileName")
-                ? args[1]
-                : DEFAULT_DB_NAME;
     }
 
     private static CarSharingCLI getMemoryImpl() {
@@ -38,5 +34,11 @@ public class Main {
         CompanyDao companyDao = new CompanyDaoH2(holder.getConnection());
         CarDao carDao = new CarDaoH2(holder.getConnection());
         return new CarSharingCLI(companyDao, carDao);
+    }
+
+    private static String getDBName(String[] args) {
+        return args.length >= 2 && args[0].equals("-databaseFileName")
+                ? args[1]
+                : DEFAULT_DB_NAME;
     }
 }

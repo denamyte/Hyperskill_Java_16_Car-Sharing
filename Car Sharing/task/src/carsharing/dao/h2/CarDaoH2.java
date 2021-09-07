@@ -23,9 +23,4 @@ public class CarDaoH2 extends JDBCDao implements CarDao {
         );
     }
 
-    @Override
-    protected void prepareStatements(Connection conn) throws SQLException {
-
-    }
-
 }

@@ -35,27 +35,27 @@ public class CarSharingCLI {
         return methodMap.get(state).apply(this);
     }
 
-    private int mainMenu() {
+    public int mainMenu() {
         System.out.println("\n1. Log in as a manager\n0. Exit");
         return userChoice();
     }
 
-    private int managerMenu() {
+    public int managerMenu() {
         System.out.println("\n1. Company list\n2. Create a company\n0. Back");
         return userChoice();
     }
 
-    private int getCompanyList() {
+    public int getCompanyList() {
         companies = companyDao.getAllCompanies();
         return companies.isEmpty() ? 0 : 1;
     }
 
-    private int emptyCompanyList() {
+    public int emptyCompanyList() {
         System.out.println("\nThe company list is empty!");
         return 0;
     }
 
-    private int chooseCompanyMenu() {
+    public int chooseCompanyMenu() {
         System.out.println("\nChoose a company:");
         companies.forEach(c -> System.out.printf("%d. %s%n", c.getId(), c.getName()));
         System.out.println("0. Back");
@@ -63,14 +63,14 @@ public class CarSharingCLI {
         return selectedCompanyIndex == 0 ? 0 : 1;
     }
 
-    private int companyMenu() {
+    public int companyMenu() {
         final Company company = companies.stream().filter(c -> c.getId() == selectedCompanyIndex).findFirst().get();
         System.out.printf("'%s' company", company.getName());
         System.out.println("\nImplementing a company menu...");
         return 0;
     }
 
-    private int createCompany() {
+    public int createCompany() {
         System.out.println("\nEnter the company name:");
         companyDao.saveCompany(new Company(scanner.nextLine()));
 

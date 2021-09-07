@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/440790/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: Thu, 02 Sep 2021 21:11:07 UTC
+update_date: Mon, 06 Sep 2021 22:12:45 UTC
 stages:
 - id: 758
   step: 11501
@@ -35,10 +35,6 @@ topics:
     theory_id: 13991
   - title: Data structures
     theory_id: 5161
-  - title: Fixed-size array
-    theory_id: 7255
-  - title: Dynamic array
-    theory_id: 5357
   - title: Introduction to operating systems
     theory_id: 9704
   - title: Introduction to databases
@@ -49,12 +45,6 @@ topics:
     theory_id: 7123
   - title: Basic CREATE statement
     theory_id: 9084
-  - title: 'Hashing: overview'
-    theory_id: 9831
-  - title: Hash function
-    theory_id: 10878
-  - title: Hash table
-    theory_id: 13054
   - title: Computer programming
     theory_id: 8739
   - title: Introduction to Java
@@ -127,6 +117,10 @@ topics:
     theory_id: 3523
   - title: Final variables
     theory_id: 7427
+  - title: Fixed-size array
+    theory_id: 7255
+  - title: Dynamic array
+    theory_id: 5357
   - title: Command line overview
     theory_id: 8977
   - title: Parameters and options
@@ -147,6 +141,12 @@ topics:
     theory_id: 3635
   - title: Managing files
     theory_id: 3648
+  - title: 'Hashing: overview'
+    theory_id: 9831
+  - title: Hash function
+    theory_id: 10878
+  - title: Hash table
+    theory_id: 13054
   - title: Introduction to generic programming
     theory_id: 3492
   - title: Generics and Object
