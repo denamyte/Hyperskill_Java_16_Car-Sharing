@@ -1,5 +1,6 @@
 package carsharing;
 
+@Deprecated
 public enum State {
     INITIAL,
     MAIN_MENU,

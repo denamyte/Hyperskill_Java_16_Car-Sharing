@@ -1,5 +1,6 @@
 package carsharing;
 
+@Deprecated
 public class StateMachine {
 
     private State state = State.INITIAL;

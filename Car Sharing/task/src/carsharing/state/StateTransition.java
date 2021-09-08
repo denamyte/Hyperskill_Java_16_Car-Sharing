@@ -1,15 +1,13 @@
-package carsharing.controller;
+package carsharing.state;
 
 import java.util.Map;
 import java.util.function.IntSupplier;
 
 /**
- * This class:
- * <ul>
- *     <li>contains the description of the current state,</li>
- *     <li>executes the action of the current state,</li>
- *     <li>outputs the next state designation</li>
- * </ul>
+ * The purpose of this class is to call the function
+ * <code>toggleState()</code> that toggles the state of
+ * this instance to one of the predefined states,
+ * based on user choice.
  */
 public class StateTransition {
 

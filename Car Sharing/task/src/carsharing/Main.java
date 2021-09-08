@@ -1,35 +1,29 @@
 package carsharing;
 
 import carsharing.dao.CarDao;
+import carsharing.dao.CompanyDao;
 import carsharing.dao.ConnectionHolder;
 import carsharing.dao.h2.CarDaoH2;
-import carsharing.dao.h2.H2ConnectionHolder;
-import carsharing.dao.CompanyDao;
 import carsharing.dao.h2.CompanyDaoH2;
+import carsharing.dao.h2.H2ConnectionHolder;
 import carsharing.dao.memory.CarDaoMemory;
 import carsharing.dao.memory.CompanyDaoMemory;
+import carsharing.state.StateMachineFactory;
 
 public class Main {
 
     private static final String DEFAULT_DB_NAME = "carsharing";
 
-    // TODO: 9/7/21 Implement new StateMachineFactory;
-    //
     public static void main(String[] args) {
-
-//        CarSharingCLI cli = getMemoryImpl();
-        CarSharingCLI cli = getH2Impl(args);
-
-        StateMachine stateMachine = new StateMachine();
-        Controller controller = new Controller(cli, stateMachine);
-        controller.programLoop();
+        CarSharingCLI cli = getH2CliImpl(args);
+        new StateMachineFactory(cli).createStateMachineController().run();
     }
 
-    private static CarSharingCLI getMemoryImpl() {
+    private static CarSharingCLI getMemoryCliImpl() {
         return new CarSharingCLI(new CompanyDaoMemory(), new CarDaoMemory());
     }
 
-    private static CarSharingCLI getH2Impl(String[] args) {
+    private static CarSharingCLI getH2CliImpl(String[] args) {
         ConnectionHolder holder = new H2ConnectionHolder(getDBName(args));
         CompanyDao companyDao = new CompanyDaoH2(holder.getConnection());
         CarDao carDao = new CarDaoH2(holder.getConnection());
