@@ -15,23 +15,20 @@ public class StateTransition {
     //                input    next state name
     private final Map<Integer, String> inputToStateMap;
     private final IntSupplier inputGenerator;
-    private final String description;
 
     public StateTransition(String stateIndex,
                            Map<Integer, String> inputToStateMap,
-                           IntSupplier inputGenerator,
-                           String description) {
+                           IntSupplier inputGenerator) {
         this.stateIndex = stateIndex;
         this.inputToStateMap = inputToStateMap;
         this.inputGenerator = inputGenerator;
-        this.description = description;
     }
 
     public String toggleState() {
         return inputToStateMap.get(inputGenerator.getAsInt());
     }
 
-    public String getDescription() {
-        return description;
+    public String getStateIndex() {
+        return stateIndex;
     }
 }

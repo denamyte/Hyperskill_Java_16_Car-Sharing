@@ -5,6 +5,16 @@ public class Car {
     private String name;
     private int companyId;
 
+    public Car(String name, int companyId) {
+        this.name = name;
+        this.companyId = companyId;
+    }
+
+    public Car(int id, String name, int companyId) {
+        this(name, companyId);
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }

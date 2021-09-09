@@ -10,6 +10,13 @@ import java.util.List;
 
 public class CompanyDaoH2 extends JDBCDao implements CompanyDao {
 
+    public static final String CREATE_TABLE_SQL =
+            "CREATE TABLE IF NOT EXISTS COMPANY(" +
+                    "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                    "NAME VARCHAR NOT NULL UNIQUE);";
+    public static final String SELECT_COMPANIES_SQL =
+            "SELECT ID, NAME FROM COMPANY;";
+
     private final Object insertLock = new Object();
 
     public CompanyDaoH2(Connection conn) {
@@ -18,24 +25,21 @@ public class CompanyDaoH2 extends JDBCDao implements CompanyDao {
 
     @Override
     protected void createTable(Connection conn) throws SQLException {
-        conn.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS COMPANY(" +
-                                                     "ID INT PRIMARY KEY AUTO_INCREMENT," +
-                                                     "NAME VARCHAR NOT NULL UNIQUE);"
-        );
+        conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
     }
 
     @Override
     public List<Company> getAllCompanies() {
-        List<Company> list = new LinkedList<>();
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT ID, NAME FROM COMPANY;")) {
+        List<Company> companies = new LinkedList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_COMPANIES_SQL)) {
             final ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
-                list.add(new Company(resultSet.getInt("ID"), resultSet.getString("NAME")));
+                companies.add(new Company(resultSet.getInt("ID"), resultSet.getString("NAME")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return list;
+        return companies;
     }
 
     @Override
