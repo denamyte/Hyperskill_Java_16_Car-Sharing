@@ -1,14 +1,14 @@
 package carsharing.dao.h2;
 
 import carsharing.dao.Car;
-import carsharing.dao.JDBCDao;
+import carsharing.dao.BaseDao;
 import carsharing.dao.CarDao;
 
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CarDaoH2 extends JDBCDao implements CarDao {
+public class CarDaoH2 extends BaseDao implements CarDao {
 
     public static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS CAR(" +

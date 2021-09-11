@@ -3,11 +3,11 @@ package carsharing.dao;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public abstract class JDBCDao {
+public abstract class BaseDao {
 
     protected Connection conn;
 
-    public JDBCDao(Connection conn) {
+    public BaseDao(Connection conn) {
         this.conn = conn;
         try {
             createTable(conn);

@@ -1,6 +1,8 @@
 package carsharing.state;
 
-import carsharing.CarSharingCLI;
+import carsharing.CarSharingMenus;
+import carsharing.state.model.StateMachineController;
+import carsharing.state.model.StateTransition;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class StateMachineFactory {
 
-    private CarSharingCLI cli;
+    private CarSharingMenus menus;
 
     enum State {
         MAIN_MENU,
@@ -30,8 +32,8 @@ public class StateMachineFactory {
         EXIT
     }
 
-    public StateMachineFactory(CarSharingCLI cli) {
-        this.cli = cli;
+    public StateMachineFactory(CarSharingMenus menus) {
+        this.menus = menus;
     }
 
     public StateMachineController createStateMachineController() {
@@ -43,62 +45,62 @@ public class StateMachineFactory {
                 new StateTransition(State.MAIN_MENU.name(),
                                     Map.of(1, State.MANAGER_MENU.name(),
                                            0, State.EXIT.name()),
-                                    cli::mainMenu
+                                    menus::mainMenu
                 ),
                 new StateTransition(State.MANAGER_MENU.name(),
                                     Map.of(1, State.GET_COMPANY_LIST.name(),
                                            2, State.CREATE_COMPANY.name(),
                                            0, State.MAIN_MENU.name()),
-                                    cli::managerMenu
+                                    menus::managerMenu
                 ),
                 new StateTransition(State.GET_COMPANY_LIST.name(),
                                     Map.of(0, State.EMPTY_COMPANY_LIST.name(),
                                            1, State.CHOOSE_COMPANY_MENU.name()),
-                                    cli::getCompanyList
+                                    menus::getCompanyList
                 ),
                 new StateTransition(State.EMPTY_COMPANY_LIST.name(),
                                     Map.of(0, State.MANAGER_MENU.name()),
-                                    cli::emptyCompanyList
+                                    menus::emptyCompanyList
                 ),
                 new StateTransition(State.CHOOSE_COMPANY_MENU.name(),
                                     Map.of(0, State.MANAGER_MENU.name(),
                                            1, State.COMPANY_MENU.name()),
-                                    cli::chooseCompanyMenu
+                                    menus::chooseCompanyMenu
                 ),
                 new StateTransition(State.COMPANY_MENU.name(),
                                     Map.of(0, State.CHOOSE_COMPANY_MENU.name(),
                                            1, State.GET_CAR_LIST.name(),
                                            2, State.CREATE_CAR.name()),
-                                    cli::companyMenu
+                                    menus::companyMenu
                 ),
 
                 new StateTransition(State.GET_CAR_LIST.name(),
                                     Map.of(0, State.EMPTY_CAR_LIST.name(),
                                            1, State.CAR_LIST.name()),
-                                    cli::getCarList
+                                    menus::getCarList
                 ),
                 new StateTransition(State.EMPTY_CAR_LIST.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
-                                    cli::emptyCarList
+                                    menus::emptyCarList
                 ),
                 new StateTransition(State.CAR_LIST.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
 
                                     // TODO: 9/9/21 To be implemented
 
-                                    cli::carList
+                                    menus::carList
                 ),
                 new StateTransition(State.CREATE_CAR.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
 
                                     // TODO: 9/9/21 To be implemented
 
-                                    cli::createCar
+                                    menus::createCar
                 ),
 
                 new StateTransition(State.CREATE_COMPANY.name(),
                                     Map.of(0, State.MANAGER_MENU.name()),
-                                    cli::createCompany
+                                    menus::createCompany
                 ),
 
 

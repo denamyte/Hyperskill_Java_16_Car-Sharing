@@ -1,4 +1,4 @@
-package carsharing.state;
+package carsharing.state.model;
 
 import java.util.Map;
 

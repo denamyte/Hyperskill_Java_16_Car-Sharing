@@ -8,6 +8,7 @@ import carsharing.dao.h2.CompanyDaoH2;
 import carsharing.dao.h2.H2ConnectionHolder;
 import carsharing.dao.memory.CarDaoMemory;
 import carsharing.dao.memory.CompanyDaoMemory;
+import carsharing.state.CurrentStateDataFacade;
 import carsharing.state.StateMachineFactory;
 
 public class Main {
@@ -15,19 +16,21 @@ public class Main {
     private static final String DEFAULT_DB_NAME = "carsharing";
 
     public static void main(String[] args) {
-        CarSharingCLI cli = getH2CliImpl(args);
-        new StateMachineFactory(cli).createStateMachineController().run();
+        CarSharingMenus menus = new CarSharingMenus(getH2DataFacade(args));
+        new StateMachineFactory(menus).createStateMachineController().run();
     }
 
-    private static CarSharingCLI getMemoryCliImpl() {
-        return new CarSharingCLI(new CompanyDaoMemory(), new CarDaoMemory());
+    private static CurrentStateDataFacade getMemoryDataFacade() {
+        final CompanyDaoMemory companyDao = new CompanyDaoMemory();
+        final CarDaoMemory carDao = new CarDaoMemory();
+        return new CurrentStateDataFacade(companyDao, carDao);
     }
 
-    private static CarSharingCLI getH2CliImpl(String[] args) {
+    private static CurrentStateDataFacade getH2DataFacade(String[] args) {
         ConnectionHolder holder = new H2ConnectionHolder(getDBName(args));
         CompanyDao companyDao = new CompanyDaoH2(holder.getConnection());
         CarDao carDao = new CarDaoH2(holder.getConnection());
-        return new CarSharingCLI(companyDao, carDao);
+        return new CurrentStateDataFacade(companyDao, carDao);
     }
 
     private static String getDBName(String[] args) {
