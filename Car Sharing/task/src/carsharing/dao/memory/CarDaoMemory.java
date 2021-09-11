@@ -16,4 +16,10 @@ public class CarDaoMemory implements CarDao {
     public List<Car> getCarsByCompanyId(int companyId) {
         return carMap.values().stream().filter(car -> car.getCompanyId() == companyId).collect(Collectors.toList());
     }
+
+    @Override
+    public void saveCar(Car car) {
+        car.setId(carMap.size() + 1);
+        carMap.put(car.getId(), car);
+    }
 }

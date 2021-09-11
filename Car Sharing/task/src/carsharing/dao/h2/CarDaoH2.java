@@ -1,7 +1,7 @@
 package carsharing.dao.h2;
 
-import carsharing.dao.Car;
 import carsharing.dao.BaseDao;
+import carsharing.dao.Car;
 import carsharing.dao.CarDao;
 
 import java.sql.*;
@@ -17,6 +17,8 @@ public class CarDaoH2 extends BaseDao implements CarDao {
                     "COMPANY_ID INT NOT NULL," +
                     "CONSTRAINT fk_COMPANY FOREIGN KEY(COMPANY_ID)" +
                     "REFERENCES COMPANY(ID));";
+    public static final String SAVE_CAR_SQL =
+            "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
     public static final String COMPANY_CARS_SQL =
             "SELECT ID, NAME FROM CAR " +
                     "WHERE COMPANY_ID = ?";
@@ -43,5 +45,16 @@ public class CarDaoH2 extends BaseDao implements CarDao {
             e.printStackTrace();
         }
         return cars;
+    }
+
+    @Override
+    public void saveCar(Car car) {
+        try (PreparedStatement stmt = conn.prepareStatement(SAVE_CAR_SQL)){
+            stmt.setString(1, car.getName());
+            stmt.setInt(2, car.getCompanyId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

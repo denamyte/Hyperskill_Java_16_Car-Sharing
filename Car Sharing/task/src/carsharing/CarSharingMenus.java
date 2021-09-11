@@ -1,9 +1,9 @@
 package carsharing;
 
-import carsharing.dao.Company;
 import carsharing.state.CurrentStateDataFacade;
 
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CarSharingMenus {
 
@@ -25,7 +25,7 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int getCompanyList() {
+    public int loadCompanyList() {
         dataFacade.loadCompanies();
         return dataFacade.areThereCompanies() ? 1 : 0;
     }
@@ -37,7 +37,8 @@ public class CarSharingMenus {
 
     public int chooseCompanyMenu() {
         System.out.println("\nChoose a company:");
-        dataFacade.getCompanies().forEach(c -> System.out.printf("%d. %s%n", c.getId(), c.getName()));
+        AtomicInteger counter = new AtomicInteger();
+        dataFacade.getCompanies().forEach(c -> System.out.printf("%d. %s%n", counter.incrementAndGet(), c.getName()));
         System.out.println("0. Back");
         int choice = userChoice();
         if (choice == 0) {
@@ -49,12 +50,14 @@ public class CarSharingMenus {
     }
 
     public int companyMenu() {
-        System.out.printf("\n'%s' company", dataFacade.getSelectedCompany().getName());
+        if (dataFacade.canPrintSelectedCompany()) {
+            System.out.printf("\n'%s' company", dataFacade.getSelectedCompany().getName());
+        }
         System.out.println("\n1. Car list\n2. Create a car\n0. Back");
         return userChoice();
     }
 
-    public int getCarList() {
+    public int loadCarList() {
         dataFacade.loadSelectedCompanyCars();
         return dataFacade.areThereCars() ? 1 : 0;
     }
@@ -65,22 +68,23 @@ public class CarSharingMenus {
     }
 
     public int carList() {
-        System.out.println("\nShowing the car list");
-        System.out.println("To be implemented");
+        System.out.println("\nCar list:");
+        AtomicInteger counter = new AtomicInteger();
+        dataFacade.getCars().forEach(car -> System.out.printf("%d. %s%n", counter.incrementAndGet(), car.getName()));
         return 0;
     }
 
     public int createCar() {
-        System.out.println("\nShowing create a car menu");
-        System.out.println("To be implemented");
+        System.out.println("\nEnter the car name:");
+        dataFacade.saveCar(scanner.nextLine());
+        System.out.println("The car was added!");
         return 0;
     }
 
 
     public int createCompany() {
         System.out.println("\nEnter the company name:");
-        dataFacade.saveCompany(new Company(scanner.nextLine()));
-
+        dataFacade.saveCompany(scanner.nextLine());
         System.out.println("The company was created!");
         return 0;
     }
@@ -88,5 +92,4 @@ public class CarSharingMenus {
     private int userChoice() {
         return Integer.parseInt(scanner.nextLine());
     }
-
 }

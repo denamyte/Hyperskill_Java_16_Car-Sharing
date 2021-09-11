@@ -10,6 +10,7 @@ public class CurrentStateDataFacade {
     private final CarDao carDao;
     private List<Company> companies = Collections.emptyList();
     private Company selectedCompany;
+    private boolean selectedCompanyPrinted;
     private List<Car> cars = Collections.emptyList();
 
     public CurrentStateDataFacade(CompanyDao companyDao, CarDao carDao) {
@@ -22,12 +23,15 @@ public class CurrentStateDataFacade {
     }
 
     public List<Company> getCompanies() {
+        if (companies.isEmpty()) {
+            loadCompanies();
+        }
         return companies;
     }
 
-    public void saveCompany(Company company) {
+    public void saveCompany(String companyName) {
         companies = Collections.emptyList();  // Invalidate companies cache
-        companyDao.saveCompany(company);
+        companyDao.saveCompany(new Company(companyName));
     }
 
     public void loadSelectedCompanyCars() {
@@ -35,15 +39,32 @@ public class CurrentStateDataFacade {
     }
 
     public List<Car> getCars() {
+        if (cars.isEmpty()) {
+            loadSelectedCompanyCars();
+        }
         return cars;
     }
 
+    public void saveCar(String carName) {
+        cars = Collections.emptyList();  // Invalidate cars cache
+        carDao.saveCar(new Car(carName, selectedCompany.getId()));
+    }
+
     public void setSelectedCompany(int companyId) {
-        this.selectedCompany = companies.stream().filter(c -> c.getId() == companyId).findFirst().orElse(null);
+        selectedCompany = companies.stream()
+                .skip(companyId - 1)
+                .findFirst().orElseThrow();
+        selectedCompanyPrinted = false;
     }
 
     public Company getSelectedCompany() {
         return selectedCompany;
+    }
+
+    public boolean canPrintSelectedCompany() {
+        boolean result = !selectedCompanyPrinted;
+        selectedCompanyPrinted = true;
+        return result;
     }
 
     public boolean areThereCompanies() {
