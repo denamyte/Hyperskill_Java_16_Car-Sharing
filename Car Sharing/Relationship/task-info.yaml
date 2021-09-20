@@ -543,9 +543,6 @@ files:
         }
     }
   learner_created: false
-- name: src/carsharing/dao/Car.java
-  visible: true
-  learner_created: true
 - name: src/carsharing/dao/Company.java
   visible: true
   text: |
@@ -592,20 +589,47 @@ files:
 - name: src/carsharing/dao/ConnectionHolder.java
   visible: true
   learner_created: true
-- name: src/carsharing/Main.java
-  visible: true
-  text: |-
-    package carsharing;
-
-    public class Main {
-
-        public static void main(String[] args) {
-            // write your code here
-        }
-    }
-  learner_created: false
 - name: src/carsharing/dao/h2/H2ConnectionHolder.java
   visible: true
+  learner_created: true
+- name: src/carsharing/dao/memory/CompanyDaoMemory.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.*;
+    import java.util.concurrent.atomic.AtomicInteger;
+
+    public class CompanyDaoMemory implements CompanyDao {
+
+        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
+        private final AtomicInteger idGen = new AtomicInteger(1);
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return new ArrayList<>(companyMap.values());
+        }
+
+        @Override
+        public void saveCompany(Company company) {
+            company.setId(idGen.getAndIncrement());
+            companyMap.put(company.getId(), company);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/CompanyDao.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public interface CompanyDao {
+
+        List<Company> getAllCompanies();
+
+        void saveCompany(Company company);
+    }
   learner_created: true
 - name: src/carsharing/dao/h2/CompanyDaoH2.java
   visible: true
@@ -683,56 +707,32 @@ files:
 
     }
   learner_created: true
-- name: src/carsharing/dao/h2/CarDaoH2.java
+- name: src/carsharing/state/model/StateMachineController.java
   visible: true
   learner_created: true
-- name: src/carsharing/state/StateMachineFactory.java
+- name: src/carsharing/state/model/StateTransition.java
   visible: true
   learner_created: true
-- name: src/carsharing/dao/CarDao.java
+- name: src/carsharing/state/CurrentStateDataFacade.java
   visible: true
   learner_created: true
+- name: src/carsharing/dao/Car.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/Main.java
+  visible: true
+  text: |-
+    package carsharing;
+
+    public class Main {
+
+        public static void main(String[] args) {
+            // write your code here
+        }
+    }
+  learner_created: false
 - name: src/carsharing/dao/memory/CarDaoMemory.java
   visible: true
-  learner_created: true
-- name: src/carsharing/dao/memory/CompanyDaoMemory.java
-  visible: true
-  text: |
-    package carsharing;
-
-    import java.util.*;
-    import java.util.concurrent.atomic.AtomicInteger;
-
-    public class CompanyDaoMemory implements CompanyDao {
-
-        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
-        private final AtomicInteger idGen = new AtomicInteger(1);
-
-        @Override
-        public List<Company> getAllCompanies() {
-            return new ArrayList<>(companyMap.values());
-        }
-
-        @Override
-        public void saveCompany(Company company) {
-            company.setId(idGen.getAndIncrement());
-            companyMap.put(company.getId(), company);
-        }
-    }
-  learner_created: true
-- name: src/carsharing/dao/CompanyDao.java
-  visible: true
-  text: |
-    package carsharing;
-
-    import java.util.List;
-
-    public interface CompanyDao {
-
-        List<Company> getAllCompanies();
-
-        void saveCompany(Company company);
-    }
   learner_created: true
 - name: src/carsharing/CarSharingMenus.java
   visible: true
@@ -798,19 +798,16 @@ files:
 
     }
   learner_created: true
+- name: src/carsharing/dao/h2/CarDaoH2.java
+  visible: true
+  learner_created: true
 - name: src/carsharing/dao/BaseDao.java
   visible: true
   learner_created: true
-- name: src/carsharing/state/model/StateMachineController.java
+- name: src/carsharing/state/StateMachineFactory.java
   visible: true
   learner_created: true
-- name: src/carsharing/state/model/StateTransition.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/state/CurrentStateDataFacade.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/db/carsharing.mv.db
+- name: src/carsharing/dao/CarDao.java
   visible: true
   learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/760/implement#comment
@@ -818,4 +815,4 @@ status: Solved
 feedback:
   message: Congratulations!
   time: Sat, 11 Sep 2021 01:35:39 UTC
-record: -1
+record: 3

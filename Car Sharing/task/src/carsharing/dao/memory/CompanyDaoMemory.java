@@ -17,8 +17,8 @@ public class CompanyDaoMemory implements CompanyDao {
     }
 
     @Override
-    public void saveCompany(Company company) {
-        company.setId(idGen.getAndIncrement());
+    public void saveCompany(String companyName) {
+        Company company = new Company(idGen.getAndIncrement(), companyName);
         companyMap.put(company.getId(), company);
     }
 }

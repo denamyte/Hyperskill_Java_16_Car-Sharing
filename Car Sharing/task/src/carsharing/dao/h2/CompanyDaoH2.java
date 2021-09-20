@@ -43,10 +43,10 @@ public class CompanyDaoH2 extends BaseDao implements CompanyDao {
     }
 
     @Override
-    public void saveCompany(Company company) {
+    public void saveCompany(String companyName) {
         synchronized (insertLock) {
             try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO COMPANY(NAME) VALUES(?)")) {
-                stmt.setString(1, company.getName());
+                stmt.setString(1, companyName);
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();

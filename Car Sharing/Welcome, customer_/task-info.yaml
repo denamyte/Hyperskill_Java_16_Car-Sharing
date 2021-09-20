@@ -862,6 +862,731 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/dao/h2/H2ConnectionHolder.java
+  visible: true
+  text: |
+    package carsharing.dao.h2;
+
+    import carsharing.dao.ConnectionHolder;
+
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.SQLException;
+
+    public class H2ConnectionHolder implements ConnectionHolder {
+
+        private Connection conn;
+
+        private static Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
+            Class.forName ("org.h2.Driver");
+            return DriverManager.getConnection("jdbc:h2:./src/carsharing/db/" + dbName);
+        }
+
+        public H2ConnectionHolder(String dbName) {
+            try {
+                conn = createConnection(dbName);
+                conn.setAutoCommit(true);
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public Connection getConnection() {
+            return conn;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/memory/CompanyDaoMemory.java
+  visible: true
+  text: |
+    package carsharing.dao.memory;
+
+    import carsharing.dao.Company;
+    import carsharing.dao.CompanyDao;
+
+    import java.util.*;
+    import java.util.concurrent.atomic.AtomicInteger;
+
+    public class CompanyDaoMemory implements CompanyDao {
+
+        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
+        private final AtomicInteger idGen = new AtomicInteger(1);
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return new ArrayList<>(companyMap.values());
+        }
+
+        @Override
+        public void saveCompany(Company company) {
+            company.setId(idGen.getAndIncrement());
+            companyMap.put(company.getId(), company);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/state/StateMachineFactory.java
+  visible: true
+  text: |
+    package carsharing.state;
+
+    import carsharing.CarSharingMenus;
+    import carsharing.state.model.StateMachineController;
+    import carsharing.state.model.StateTransition;
+
+    import java.util.*;
+    import java.util.stream.Collectors;
+
+    public class StateMachineFactory {
+
+        private final CarSharingMenus menus;
+
+        enum State {
+            MAIN_MENU,
+            MANAGER_MENU,
+
+            LOAD_COMPANY_LIST,
+            EMPTY_COMPANY_LIST,
+            CHOOSE_COMPANY_MENU,
+            COMPANY_MENU,
+            CREATE_COMPANY,
+
+            LOAD_CAR_LIST,
+            EMPTY_CAR_LIST,
+            CAR_LIST,
+            CREATE_CAR,
+
+            EXIT
+        }
+
+        public StateMachineFactory(CarSharingMenus menus) {
+            this.menus = menus;
+        }
+
+        public StateMachineController createStateMachineController() {
+            return new StateMachineController(createTransitionMap(), State.MAIN_MENU.name());
+        }
+
+        private Map<String, StateTransition> createTransitionMap() {
+            List<StateTransition> transList = List.of(
+                    new StateTransition(State.MAIN_MENU.name(),
+                                        Map.of(1, State.MANAGER_MENU.name(),
+                                               0, State.EXIT.name()),
+                                        menus::mainMenu
+                    ),
+                    new StateTransition(State.MANAGER_MENU.name(),
+                                        Map.of(1, State.LOAD_COMPANY_LIST.name(),
+                                               2, State.CREATE_COMPANY.name(),
+                                               0, State.MAIN_MENU.name()),
+                                        menus::managerMenu
+                    ),
+                    new StateTransition(State.LOAD_COMPANY_LIST.name(),
+                                        Map.of(0, State.EMPTY_COMPANY_LIST.name(),
+                                               1, State.CHOOSE_COMPANY_MENU.name()),
+                                        menus::loadCompanyList
+                    ),
+                    new StateTransition(State.EMPTY_COMPANY_LIST.name(),
+                                        Map.of(0, State.MANAGER_MENU.name()),
+                                        menus::emptyCompanyList
+                    ),
+                    new StateTransition(State.CHOOSE_COMPANY_MENU.name(),
+                                        Map.of(0, State.MANAGER_MENU.name(),
+                                               1, State.COMPANY_MENU.name()),
+                                        menus::chooseCompanyMenu
+                    ),
+                    new StateTransition(State.COMPANY_MENU.name(),
+                                        Map.of(0, State.MANAGER_MENU.name(),
+                                               1, State.LOAD_CAR_LIST.name(),
+                                               2, State.CREATE_CAR.name()),
+                                        menus::companyMenu
+                    ),
+                    new StateTransition(State.CREATE_COMPANY.name(),
+                                        Map.of(0, State.MANAGER_MENU.name()),
+                                        menus::createCompany
+                    ),
+
+                    new StateTransition(State.LOAD_CAR_LIST.name(),
+                                        Map.of(0, State.EMPTY_CAR_LIST.name(),
+                                               1, State.CAR_LIST.name()),
+                                        menus::loadCarList
+                    ),
+                    new StateTransition(State.EMPTY_CAR_LIST.name(),
+                                        Map.of(0, State.COMPANY_MENU.name()),
+                                        menus::emptyCarList
+                    ),
+                    new StateTransition(State.CAR_LIST.name(),
+                                        Map.of(0, State.COMPANY_MENU.name()),
+                                        menus::carList
+                    ),
+                    new StateTransition(State.CREATE_CAR.name(),
+                                        Map.of(0, State.COMPANY_MENU.name()),
+                                        menus::createCar
+                    ),
+
+                    new StateTransition(State.EXIT.name(),
+                                        Map.of(0, ""),
+                                        () -> 0
+                    )
+            );
+            return Collections.unmodifiableMap(
+                    transList.stream().collect(Collectors.toMap(StateTransition::getStateIndex, s -> s)));
+        }
+
+
+    }
+  learner_created: true
+- name: src/carsharing/dao/CarDao.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.util.List;
+
+    public interface CarDao {
+
+        List<Car> getCarsByCompanyId(int companyId);
+
+        void saveCar(Car car);
+    }
+  learner_created: true
+- name: src/carsharing/dao/Car.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    public class Car {
+        private int id;
+        private String name;
+        private int companyId;
+
+        public Car(String name, int companyId) {
+            this.name = name;
+            this.companyId = companyId;
+        }
+
+        public Car(int id, String name, int companyId) {
+            this(name, companyId);
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getCompanyId() {
+            return companyId;
+        }
+
+        public void setCompanyId(int companyId) {
+            this.companyId = companyId;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/h2/CarDaoH2.java
+  visible: true
+  text: |
+    package carsharing.dao.h2;
+
+    import carsharing.dao.BaseDao;
+    import carsharing.dao.Car;
+    import carsharing.dao.CarDao;
+
+    import java.sql.*;
+    import java.util.LinkedList;
+    import java.util.List;
+
+    public class CarDaoH2 extends BaseDao implements CarDao {
+
+        public static final String CREATE_TABLE_SQL =
+                "CREATE TABLE IF NOT EXISTS CAR(" +
+                        "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                        "NAME VARCHAR NOT NULL UNIQUE," +
+                        "COMPANY_ID INT NOT NULL," +
+                        "CONSTRAINT fk_COMPANY FOREIGN KEY(COMPANY_ID)" +
+                        "REFERENCES COMPANY(ID));";
+        public static final String SAVE_CAR_SQL =
+                "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
+        public static final String COMPANY_CARS_SQL =
+                "SELECT ID, NAME FROM CAR " +
+                        "WHERE COMPANY_ID = ?";
+
+        public CarDaoH2(Connection conn) {
+            super(conn);
+        }
+
+        @Override
+        protected void createTable(Connection conn) throws SQLException {
+            conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
+        }
+
+        @Override
+        public List<Car> getCarsByCompanyId(int companyId) {
+            List<Car> cars = new LinkedList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(COMPANY_CARS_SQL)) {
+                stmt.setInt(1, companyId);
+                final ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    cars.add(new Car(resultSet.getInt("ID"), resultSet.getString("NAME"), companyId));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return cars;
+        }
+
+        @Override
+        public void saveCar(Car car) {
+            try (PreparedStatement stmt = conn.prepareStatement(SAVE_CAR_SQL)){
+                stmt.setString(1, car.getName());
+                stmt.setInt(2, car.getCompanyId());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/BaseDao.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.sql.Connection;
+    import java.sql.SQLException;
+
+    public abstract class BaseDao {
+
+        protected Connection conn;
+
+        public BaseDao(Connection conn) {
+            this.conn = conn;
+            try {
+                createTable(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        protected abstract void createTable(Connection conn) throws SQLException;
+    }
+  learner_created: true
+- name: src/carsharing/dao/h2/CompanyDaoH2.java
+  visible: true
+  text: |
+    package carsharing.dao.h2;
+
+    import carsharing.dao.BaseDao;
+    import carsharing.dao.Company;
+    import carsharing.dao.CompanyDao;
+
+    import java.sql.*;
+    import java.util.LinkedList;
+    import java.util.List;
+
+    public class CompanyDaoH2 extends BaseDao implements CompanyDao {
+
+        public static final String CREATE_TABLE_SQL =
+                "CREATE TABLE IF NOT EXISTS COMPANY(" +
+                        "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                        "NAME VARCHAR NOT NULL UNIQUE);";
+        public static final String SELECT_COMPANIES_SQL =
+                "SELECT ID, NAME FROM COMPANY;";
+
+        private final Object insertLock = new Object();
+
+        public CompanyDaoH2(Connection conn) {
+            super(conn);
+        }
+
+        @Override
+        protected void createTable(Connection conn) throws SQLException {
+            conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
+        }
+
+        @Override
+        public List<Company> getAllCompanies() {
+            List<Company> companies = new LinkedList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(SELECT_COMPANIES_SQL)) {
+                final ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    companies.add(new Company(resultSet.getInt("ID"), resultSet.getString("NAME")));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return companies;
+        }
+
+        @Override
+        public void saveCompany(Company company) {
+            synchronized (insertLock) {
+                try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO COMPANY(NAME) VALUES(?)")) {
+                    stmt.setString(1, company.getName());
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+  learner_created: true
+- name: src/carsharing/state/CurrentStateDataFacade.java
+  visible: true
+  text: |
+    package carsharing.state;
+
+    import carsharing.dao.*;
+
+    import java.util.Collections;
+    import java.util.List;
+
+    public class CurrentStateDataFacade {
+        private final CompanyDao companyDao;
+        private final CarDao carDao;
+        private List<Company> companies = Collections.emptyList();
+        private Company selectedCompany;
+        private boolean selectedCompanyPrinted;
+        private List<Car> cars = Collections.emptyList();
+
+        public CurrentStateDataFacade(CompanyDao companyDao, CarDao carDao) {
+            this.companyDao = companyDao;
+            this.carDao = carDao;
+        }
+
+        public void loadCompanies() {
+            companies = companyDao.getAllCompanies();
+        }
+
+        public List<Company> getCompanies() {
+            if (companies.isEmpty()) {
+                loadCompanies();
+            }
+            return companies;
+        }
+
+        public void saveCompany(String companyName) {
+            companies = Collections.emptyList();  // Invalidate companies cache
+            companyDao.saveCompany(new Company(companyName));
+        }
+
+        public void loadSelectedCompanyCars() {
+            cars = carDao.getCarsByCompanyId(selectedCompany.getId());
+        }
+
+        public List<Car> getCars() {
+            if (cars.isEmpty()) {
+                loadSelectedCompanyCars();
+            }
+            return cars;
+        }
+
+        public void saveCar(String carName) {
+            cars = Collections.emptyList();  // Invalidate cars cache
+            carDao.saveCar(new Car(carName, selectedCompany.getId()));
+        }
+
+        public void setSelectedCompany(int companyId) {
+            selectedCompany = companies.stream()
+                    .skip(companyId - 1)
+                    .findFirst().orElseThrow();
+            selectedCompanyPrinted = false;
+        }
+
+        public Company getSelectedCompany() {
+            return selectedCompany;
+        }
+
+        public boolean canPrintSelectedCompany() {
+            boolean result = !selectedCompanyPrinted;
+            selectedCompanyPrinted = true;
+            return result;
+        }
+
+        public boolean areThereCompanies() {
+            return !companies.isEmpty();
+        }
+
+        public boolean areThereCars() {
+            return !cars.isEmpty();
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/memory/CarDaoMemory.java
+  visible: true
+  text: |
+    package carsharing.dao.memory;
+
+    import carsharing.dao.Car;
+    import carsharing.dao.CarDao;
+
+    import java.util.LinkedHashMap;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.stream.Collectors;
+
+    public class CarDaoMemory implements CarDao {
+
+        private final Map<Integer, Car> carMap = new LinkedHashMap<>();
+
+        @Override
+        public List<Car> getCarsByCompanyId(int companyId) {
+            return carMap.values().stream().filter(car -> car.getCompanyId() == companyId).collect(Collectors.toList());
+        }
+
+        @Override
+        public void saveCar(Car car) {
+            car.setId(carMap.size() + 1);
+            carMap.put(car.getId(), car);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/state/model/StateTransition.java
+  visible: true
+  text: |
+    package carsharing.state.model;
+
+    import java.util.Map;
+    import java.util.function.IntSupplier;
+
+    /**
+     * The purpose of this class is to call the function
+     * <code>toggleState()</code> that toggles the state of
+     * this instance to one of the predefined states,
+     * based on user choice.
+     */
+    public class StateTransition {
+
+        private final String stateIndex;
+        //                input    next state name
+        private final Map<Integer, String> inputToStateMap;
+        private final IntSupplier inputGenerator;
+
+        public StateTransition(String stateIndex,
+                               Map<Integer, String> inputToStateMap,
+                               IntSupplier inputGenerator) {
+            this.stateIndex = stateIndex;
+            this.inputToStateMap = inputToStateMap;
+            this.inputGenerator = inputGenerator;
+        }
+
+        public String toggleState() {
+            return inputToStateMap.get(inputGenerator.getAsInt());
+        }
+
+        public String getStateIndex() {
+            return stateIndex;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CarSharingMenus.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import carsharing.state.CurrentStateDataFacade;
+
+    import java.util.Scanner;
+    import java.util.concurrent.atomic.AtomicInteger;
+
+    public class CarSharingMenus {
+
+        private static final Scanner scanner = new Scanner(System.in);
+
+        private CurrentStateDataFacade dataFacade;
+
+        public CarSharingMenus(CurrentStateDataFacade dataFacade) {
+            this.dataFacade = dataFacade;
+        }
+
+        public int mainMenu() {
+            System.out.println("\n1. Log in as a manager\n0. Exit");
+            return userChoice();
+        }
+
+        public int managerMenu() {
+            System.out.println("\n1. Company list\n2. Create a company\n0. Back");
+            return userChoice();
+        }
+
+        public int loadCompanyList() {
+            dataFacade.loadCompanies();
+            return dataFacade.areThereCompanies() ? 1 : 0;
+        }
+
+        public int emptyCompanyList() {
+            System.out.println("\nThe company list is empty!");
+            return 0;
+        }
+
+        public int chooseCompanyMenu() {
+            System.out.println("\nChoose a company:");
+            AtomicInteger counter = new AtomicInteger();
+            dataFacade.getCompanies().forEach(c -> System.out.printf("%d. %s%n", counter.incrementAndGet(), c.getName()));
+            System.out.println("0. Back");
+            int choice = userChoice();
+            if (choice == 0) {
+                return 0;
+            } else {
+                dataFacade.setSelectedCompany(choice);
+                return 1;
+            }
+        }
+
+        public int companyMenu() {
+            if (dataFacade.canPrintSelectedCompany()) {
+                System.out.printf("\n'%s' company", dataFacade.getSelectedCompany().getName());
+            }
+            System.out.println("\n1. Car list\n2. Create a car\n0. Back");
+            return userChoice();
+        }
+
+        public int loadCarList() {
+            dataFacade.loadSelectedCompanyCars();
+            return dataFacade.areThereCars() ? 1 : 0;
+        }
+
+        public int emptyCarList() {
+            System.out.println("\nThe car list is empty!");
+            return 0;
+        }
+
+        public int carList() {
+            System.out.println("\nCar list:");
+            AtomicInteger counter = new AtomicInteger();
+            dataFacade.getCars().forEach(car -> System.out.printf("%d. %s%n", counter.incrementAndGet(), car.getName()));
+            return 0;
+        }
+
+        public int createCar() {
+            System.out.println("\nEnter the car name:");
+            dataFacade.saveCar(scanner.nextLine());
+            System.out.println("The car was added!");
+            return 0;
+        }
+
+
+        public int createCompany() {
+            System.out.println("\nEnter the company name:");
+            dataFacade.saveCompany(scanner.nextLine());
+            System.out.println("The company was created!");
+            return 0;
+        }
+
+        private int userChoice() {
+            return Integer.parseInt(scanner.nextLine());
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/ConnectionHolder.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.sql.Connection;
+
+    public interface ConnectionHolder {
+        Connection getConnection();
+    }
+  learner_created: true
+- name: src/carsharing/dao/CompanyDao.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.util.List;
+
+    public interface CompanyDao {
+
+        List<Company> getAllCompanies();
+
+        void saveCompany(Company company);
+    }
+  learner_created: true
+- name: src/carsharing/state/model/StateMachineController.java
+  visible: true
+  text: |
+    package carsharing.state.model;
+
+    import java.util.Map;
+
+    public class StateMachineController {
+        private final Map<String, StateTransition> transitionMap;
+        private String state;
+
+        public StateMachineController(Map<String, StateTransition> transitionMap, String startingStateName) {
+            this.transitionMap = transitionMap;
+            this.state = startingStateName;
+        }
+
+        public void run() {
+            while (state != null && !state.isEmpty()) {
+                state = transitionMap.get(state).toggleState();
+            }
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/Company.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    public class Company {
+        private int id;
+        private String name;
+
+        public Company(String name) {
+            this.name = name;
+        }
+
+        public Company(int id, String name) {
+            this(name);
+            this.id = id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "Car{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/Customer.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/IdAndName.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/761/implement#comment
 status: Unchecked
 record: -1

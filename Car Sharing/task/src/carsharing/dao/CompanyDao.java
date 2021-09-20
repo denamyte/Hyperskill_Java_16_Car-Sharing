@@ -6,5 +6,5 @@ public interface CompanyDao {
 
     List<Company> getAllCompanies();
 
-    void saveCompany(Company company);
+    void saveCompany(String companyName);
 }

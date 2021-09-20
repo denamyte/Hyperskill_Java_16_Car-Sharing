@@ -31,7 +31,7 @@ public class CurrentStateDataFacade {
 
     public void saveCompany(String companyName) {
         companies = Collections.emptyList();  // Invalidate companies cache
-        companyDao.saveCompany(new Company(companyName));
+        companyDao.saveCompany(companyName);
     }
 
     public void loadSelectedCompanyCars() {
@@ -47,7 +47,7 @@ public class CurrentStateDataFacade {
 
     public void saveCar(String carName) {
         cars = Collections.emptyList();  // Invalidate cars cache
-        carDao.saveCar(new Car(carName, selectedCompany.getId()));
+        carDao.saveCar(new Car(0, carName, selectedCompany.getId()));
     }
 
     public void setSelectedCompany(int companyId) {
