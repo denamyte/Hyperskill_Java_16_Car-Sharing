@@ -1587,6 +1587,18 @@ files:
 - name: src/carsharing/dao/IdAndName.java
   visible: true
   learner_created: true
+- name: src/carsharing/dao/CustomerDao.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/h2/CustomerDaoH2.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/memory/CustomerDaoMemory.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/memory/AbstractDaoMemory.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/761/implement#comment
 status: Unchecked
 record: -1

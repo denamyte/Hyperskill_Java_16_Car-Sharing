@@ -9,14 +9,14 @@ public class CarSharingMenus {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    private CurrentStateDataFacade dataFacade;
+    private final CurrentStateDataFacade dataFacade;
 
     public CarSharingMenus(CurrentStateDataFacade dataFacade) {
         this.dataFacade = dataFacade;
     }
 
     public int mainMenu() {
-        System.out.println("\n1. Log in as a manager\n0. Exit");
+        System.out.println("\n1. Log in as a manager\n2. Log in as a customer\n3. Create a customer\n0. Exit");
         return userChoice();
     }
 

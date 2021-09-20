@@ -44,12 +44,16 @@ public class StateMachineFactory {
                                            0, State.EXIT.name()),
                                     menus::mainMenu
                 ),
+
+                // TODO: 9/21/21 Introduce new states about a customer into the main menu
+
                 new StateTransition(State.MANAGER_MENU.name(),
                                     Map.of(1, State.LOAD_COMPANY_LIST.name(),
                                            2, State.CREATE_COMPANY.name(),
                                            0, State.MAIN_MENU.name()),
                                     menus::managerMenu
                 ),
+
                 new StateTransition(State.LOAD_COMPANY_LIST.name(),
                                     Map.of(0, State.EMPTY_COMPANY_LIST.name(),
                                            1, State.CHOOSE_COMPANY_MENU.name()),

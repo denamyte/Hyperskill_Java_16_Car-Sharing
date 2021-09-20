@@ -16,5 +16,9 @@ public abstract class BaseDao {
         }
     }
 
-    protected abstract void createTable(Connection conn) throws SQLException;
+    protected void createTable(Connection conn) throws SQLException {
+        conn.createStatement().executeUpdate(getCreateTableSQL());
+    }
+
+    protected abstract String getCreateTableSQL();
 }

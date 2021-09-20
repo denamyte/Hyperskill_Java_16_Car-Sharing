@@ -3,22 +3,17 @@ package carsharing.dao.memory;
 import carsharing.dao.Company;
 import carsharing.dao.CompanyDao;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
-public class CompanyDaoMemory implements CompanyDao {
-
-    private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
-    private final AtomicInteger idGen = new AtomicInteger(1);
+public class CompanyDaoMemory extends AbstractDaoMemory<Company> implements CompanyDao {
 
     @Override
     public List<Company> getAllCompanies() {
-        return new ArrayList<>(companyMap.values());
+        return getAll();
     }
 
     @Override
     public void saveCompany(String companyName) {
-        Company company = new Company(idGen.getAndIncrement(), companyName);
-        companyMap.put(company.getId(), company);
+        saveItem(new Company(nextId(), companyName));
     }
 }

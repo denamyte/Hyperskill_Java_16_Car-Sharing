@@ -24,8 +24,8 @@ public class CompanyDaoH2 extends BaseDao implements CompanyDao {
     }
 
     @Override
-    protected void createTable(Connection conn) throws SQLException {
-        conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
+    protected String getCreateTableSQL() {
+        return CREATE_TABLE_SQL;
     }
 
     @Override
