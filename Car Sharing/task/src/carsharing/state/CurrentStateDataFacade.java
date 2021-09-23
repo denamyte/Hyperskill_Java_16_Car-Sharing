@@ -13,6 +13,8 @@ public class CurrentStateDataFacade {
     private Company selectedCompany;
     private boolean selectedCompanyPrinted;
     private List<Car> cars = Collections.emptyList();
+    private List<Customer> customers = Collections.emptyList();
+    private Customer selectedCustomer;
 
     public CurrentStateDataFacade(CompanyDao companyDao, CarDao carDao, CustomerDao customerDao) {
         this.companyDao = companyDao;
@@ -36,6 +38,23 @@ public class CurrentStateDataFacade {
         companyDao.saveCompany(companyName);
     }
 
+    public void setSelectedCompany(int choice) {
+        selectedCompany = companies.stream()
+                .skip(choice - 1)
+                .findFirst().orElseThrow();
+        selectedCompanyPrinted = false;
+    }
+
+    public Company getSelectedCompany() {
+        return selectedCompany;
+    }
+
+    public boolean canPrintSelectedCompany() {
+        boolean result = !selectedCompanyPrinted;
+        selectedCompanyPrinted = true;
+        return result;
+    }
+
     public void loadSelectedCompanyCars() {
         cars = carDao.getCarsByCompanyId(selectedCompany.getId());
     }
@@ -52,21 +71,26 @@ public class CurrentStateDataFacade {
         carDao.saveCar(new Car(0, carName, selectedCompany.getId()));
     }
 
-    public void setSelectedCompany(int companyId) {
-        selectedCompany = companies.stream()
-                .skip(companyId - 1)
+    public void loadCustomers() {
+        customers = customerDao.getAllCustomers();
+    }
+
+    public List<Customer> getCustomers() {
+        if (customers.isEmpty()) {
+            loadCustomers();
+        }
+        return customers;
+    }
+
+    public void saveCustomer(String customerName) {
+        customers = Collections.emptyList();  // Invalidate customers cache
+        customerDao.saveCustomer(customerName);
+    }
+
+    public void setSelectedCustomer(int choice) {
+        selectedCustomer = customers.stream()
+                .skip(choice - 1)
                 .findFirst().orElseThrow();
-        selectedCompanyPrinted = false;
-    }
-
-    public Company getSelectedCompany() {
-        return selectedCompany;
-    }
-
-    public boolean canPrintSelectedCompany() {
-        boolean result = !selectedCompanyPrinted;
-        selectedCompanyPrinted = true;
-        return result;
     }
 
     public boolean noCompanies() {
@@ -75,5 +99,9 @@ public class CurrentStateDataFacade {
 
     public boolean noCars() {
         return cars.isEmpty();
+    }
+
+    public boolean noCustomers() {
+        return customers.isEmpty();
     }
 }

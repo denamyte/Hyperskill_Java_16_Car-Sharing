@@ -16,8 +16,8 @@ public class CompanyDaoH2 extends BaseDao implements CompanyDao {
                     "NAME VARCHAR NOT NULL UNIQUE);";
     public static final String SELECT_COMPANIES_SQL =
             "SELECT ID, NAME FROM COMPANY;";
-
-    private final Object insertLock = new Object();
+    public static final String SAVE_COMPANY_SQL =
+            "INSERT INTO COMPANY(NAME) VALUES(?)";
 
     public CompanyDaoH2(Connection conn) {
         super(conn);
@@ -44,13 +44,11 @@ public class CompanyDaoH2 extends BaseDao implements CompanyDao {
 
     @Override
     public void saveCompany(String companyName) {
-        synchronized (insertLock) {
-            try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO COMPANY(NAME) VALUES(?)")) {
-                stmt.setString(1, companyName);
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try (PreparedStatement stmt = conn.prepareStatement(SAVE_COMPANY_SQL)) {
+            stmt.setString(1, companyName);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

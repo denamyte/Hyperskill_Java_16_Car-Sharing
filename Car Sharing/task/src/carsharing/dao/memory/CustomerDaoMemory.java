@@ -10,4 +10,9 @@ public class CustomerDaoMemory extends AbstractDaoMemory<Customer> implements Cu
     public List<Customer> getAllCustomers() {
         return getAll();
     }
+
+    @Override
+    public void saveCustomer(String customerName) {
+        saveItem(new Customer(nextId(), customerName));
+    }
 }

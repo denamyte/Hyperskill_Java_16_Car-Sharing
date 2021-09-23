@@ -4,7 +4,8 @@ import carsharing.dao.BaseDao;
 import carsharing.dao.Customer;
 import carsharing.dao.CustomerDao;
 
-import java.sql.Connection;
+import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CustomerDaoH2 extends BaseDao implements CustomerDao {
@@ -16,6 +17,10 @@ public class CustomerDaoH2 extends BaseDao implements CustomerDao {
                     "RENTED_CAR_ID INT DEFAULT NULL," +
                     "CONSTRAINT fk_CAR FOREIGN KEY(RENTED_CAR_ID)" +
                     "REFERENCES CAR(ID));";
+    public static final String SELECT_CUSTOMERS_SQL =
+            "SELECT ID, NAME, RENTED_CAR_ID FROM CUSTOMER;";
+    public static final String SAVE_CUSTOMER_SQL =
+            "INSERT INTO CUSTOMER(NAME) VALUES(?)";
 
     public CustomerDaoH2(Connection conn) {
         super(conn);
@@ -28,6 +33,26 @@ public class CustomerDaoH2 extends BaseDao implements CustomerDao {
 
     @Override
     public List<Customer> getAllCustomers() {
-        return null;
+        List<Customer> customers = new LinkedList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_CUSTOMERS_SQL)) {
+            final ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                customers.add(new Customer(resultSet.getInt("ID"), resultSet.getString("NAME"))
+                                      .setCarId(resultSet.getInt("RENTED_CAR_ID")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return customers;
+    }
+
+    @Override
+    public void saveCustomer(String customerName) {
+        try (PreparedStatement stmt = conn.prepareStatement(SAVE_CUSTOMER_SQL)) {
+            stmt.setString(1, customerName);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

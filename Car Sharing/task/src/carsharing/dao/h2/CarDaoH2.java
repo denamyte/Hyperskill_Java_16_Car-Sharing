@@ -17,11 +17,11 @@ public class CarDaoH2 extends BaseDao implements CarDao {
                     "COMPANY_ID INT NOT NULL," +
                     "CONSTRAINT fk_COMPANY FOREIGN KEY(COMPANY_ID)" +
                     "REFERENCES COMPANY(ID));";
-    public static final String SAVE_CAR_SQL =
-            "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
     public static final String COMPANY_CARS_SQL =
             "SELECT ID, NAME FROM CAR " +
                     "WHERE COMPANY_ID = ?";
+    public static final String SAVE_CAR_SQL =
+            "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
 
     public CarDaoH2(Connection conn) {
         super(conn);

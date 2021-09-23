@@ -24,6 +24,11 @@ public class StateMachineFactory {
         CAR_LIST,
         CREATE_CAR,
 
+        CUSTOMER_MENU,  // NEW
+        RENT_CAR,  // NEW
+        RETURN_RENTED_CAR,  // NEW
+        RENTED_CAR_VIEW,  // NEW
+
         EXIT
     }
 
@@ -52,22 +57,19 @@ public class StateMachineFactory {
                                     menus::managerMenu
                 ),
                 new StateTransition(State.LOGIN_AS_CUSTOMER.name(),
-                                    Map.of(0, State.MAIN_MENU.name()),
-                                    // TODO: 9/23/21 Change the dummy map for a real one
-                                    () -> { System.out.println("\nUnder construction..."); return 0;}
-                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
+                                    Map.of(0, State.MAIN_MENU.name(),
+                                           1, State.CUSTOMER_MENU.name()),
+                                    menus::customerListChoice
                 ),
                 new StateTransition(State.CREATE_CUSTOMER.name(),
                                     Map.of(0, State.MAIN_MENU.name()),
-                                    // TODO: 9/23/21 Change the dummy map for a real one
-                                    () -> { System.out.println("\nUnder construction..."); return 0;}
-                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
+                                    menus::createCustomer
                 ),
 
                 new StateTransition(State.COMPANIES_LIST.name(),
                                     Map.of(0, State.LOGIN_AS_MANAGER.name(),
                                            1, State.COMPANY_MENU.name()),
-                                    menus::companiesList
+                                    menus::companiesListChoice
                 ),
 
                 new StateTransition(State.COMPANY_MENU.name(),
@@ -83,11 +85,18 @@ public class StateMachineFactory {
 
                 new StateTransition(State.CAR_LIST.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
-                                    menus::carListAlt
+                                    menus::carList
                 ),
                 new StateTransition(State.CREATE_CAR.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
                                     menus::createCar
+                ),
+
+                new StateTransition(State.CUSTOMER_MENU.name(),
+                                    Map.of(0, State.LOGIN_AS_CUSTOMER.name()),
+                                    // TODO: 9/23/21 Change the dummy map for a real one
+                                    () -> { System.out.println("\nUnder construction..."); return 0;}
+                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
                 ),
 
                 new StateTransition(State.EXIT.name(),

@@ -7,6 +7,15 @@ public class Customer extends IdAndName {
         super(id, name);
     }
 
+    public Customer setCarId(int carId) {
+        this.carId = carId;
+        return this;
+    }
+
+    public int getCarId() {
+        return carId;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +

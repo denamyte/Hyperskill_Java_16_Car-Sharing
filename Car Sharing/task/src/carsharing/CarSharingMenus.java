@@ -6,6 +6,7 @@ import carsharing.state.CurrentStateDataFacade;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class CarSharingMenus {
 
@@ -27,7 +28,7 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int companiesList() {
+    public int companiesListChoice() {
         dataFacade.loadCompanies();
         if (dataFacade.noCompanies()) {
             System.out.println("\nThe company list is empty!");
@@ -51,13 +52,48 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int carListAlt() {
+    public int carList() {
         dataFacade.loadSelectedCompanyCars();
         if (dataFacade.noCars()) {
             System.out.println("\nThe car list is empty!");
         } else {
             printItemsList(dataFacade.getCars(), "\nCar list:", null);
         }
+        return 0;
+    }
+
+    public int customerListChoice() {
+        dataFacade.loadCustomers();
+        if (dataFacade.noCustomers()) {
+            System.out.println("\nThe customer list is empty!");
+            return 0;
+        }
+        printItemsList(dataFacade.getCustomers(), "\nCustomer list:", "0. Back");
+        int choice = userChoice();
+        if (choice == 0) {
+            return 0;
+        } else {
+            dataFacade.setSelectedCustomer(choice);
+            return 1;
+        }
+    }
+
+    public int createCompany() {
+        return saveTemplate("\nEnter the company name:", dataFacade::saveCompany, "The company was created!");
+    }
+
+    public int createCar() {
+        return saveTemplate("\nEnter the car name:", dataFacade::saveCar, "The car was added!");
+    }
+
+    public int createCustomer() {
+        return saveTemplate("\nEnter the customer name:", dataFacade::saveCustomer, "The customer was added!");
+    }
+
+    private int saveTemplate(String enterPrompt, Consumer<String> saveFn, String message) {
+        System.out.println(enterPrompt);
+        saveFn.accept(scanner.nextLine());
+        System.out.println(message);
         return 0;
     }
 
@@ -70,21 +106,6 @@ public class CarSharingMenus {
         if (suffix != null) {
             System.out.println(suffix);
         }
-    }
-
-    public int createCar() {
-        System.out.println("\nEnter the car name:");
-        dataFacade.saveCar(scanner.nextLine());
-        System.out.println("The car was added!");
-        return 0;
-    }
-
-
-    public int createCompany() {
-        System.out.println("\nEnter the company name:");
-        dataFacade.saveCompany(scanner.nextLine());
-        System.out.println("The company was created!");
-        return 0;
     }
 
     private int userChoice() {
