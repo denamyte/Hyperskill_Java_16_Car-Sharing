@@ -1,7 +1,9 @@
 package carsharing;
 
+import carsharing.dao.IdAndName;
 import carsharing.state.CurrentStateDataFacade;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,21 +27,13 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int loadCompanyList() {
+    public int companiesList() {
         dataFacade.loadCompanies();
-        return dataFacade.areThereCompanies() ? 1 : 0;
-    }
-
-    public int emptyCompanyList() {
-        System.out.println("\nThe company list is empty!");
-        return 0;
-    }
-
-    public int chooseCompanyMenu() {
-        System.out.println("\nChoose a company:");
-        AtomicInteger counter = new AtomicInteger();
-        dataFacade.getCompanies().forEach(c -> System.out.printf("%d. %s%n", counter.incrementAndGet(), c.getName()));
-        System.out.println("0. Back");
+        if (dataFacade.noCompanies()) {
+            System.out.println("\nThe company list is empty!");
+            return 0;
+        }
+        printItemsList(dataFacade.getCompanies(), "\nChoose a company:", "0. Back");
         int choice = userChoice();
         if (choice == 0) {
             return 0;
@@ -57,21 +51,25 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int loadCarList() {
+    public int carListAlt() {
         dataFacade.loadSelectedCompanyCars();
-        return dataFacade.areThereCars() ? 1 : 0;
-    }
-
-    public int emptyCarList() {
-        System.out.println("\nThe car list is empty!");
+        if (dataFacade.noCars()) {
+            System.out.println("\nThe car list is empty!");
+        } else {
+            printItemsList(dataFacade.getCars(), "\nCar list:", null);
+        }
         return 0;
     }
 
-    public int carList() {
-        System.out.println("\nCar list:");
+    private <T extends IdAndName> void printItemsList(List<T> items, String prefix, String suffix) {
+        if (prefix != null) {
+            System.out.println(prefix);
+        }
         AtomicInteger counter = new AtomicInteger();
-        dataFacade.getCars().forEach(car -> System.out.printf("%d. %s%n", counter.incrementAndGet(), car.getName()));
-        return 0;
+        items.forEach(item -> System.out.printf("%d. %s%n", counter.incrementAndGet(), item.getName()));
+        if (suffix != null) {
+            System.out.println(suffix);
+        }
     }
 
     public int createCar() {

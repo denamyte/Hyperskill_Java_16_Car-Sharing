@@ -69,11 +69,11 @@ public class CurrentStateDataFacade {
         return result;
     }
 
-    public boolean areThereCompanies() {
-        return !companies.isEmpty();
+    public boolean noCompanies() {
+        return companies.isEmpty();
     }
 
-    public boolean areThereCars() {
-        return !cars.isEmpty();
+    public boolean noCars() {
+        return cars.isEmpty();
     }
 }

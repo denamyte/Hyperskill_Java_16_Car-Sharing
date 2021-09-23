@@ -13,7 +13,7 @@ public class CustomerDaoH2 extends BaseDao implements CustomerDao {
             "CREATE TABLE IF NOT EXISTS CUSTOMER(" +
                     "ID INT PRIMARY KEY AUTO_INCREMENT," +
                     "NAME VARCHAR NOT NULL UNIQUE," +
-                    "RENTED_CAR_ID INT," +
+                    "RENTED_CAR_ID INT DEFAULT NULL," +
                     "CONSTRAINT fk_CAR FOREIGN KEY(RENTED_CAR_ID)" +
                     "REFERENCES CAR(ID));";
 

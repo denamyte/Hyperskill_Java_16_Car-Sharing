@@ -13,16 +13,14 @@ public class StateMachineFactory {
 
     enum State {
         MAIN_MENU,
-        MANAGER_MENU,
+        LOGIN_AS_MANAGER,
+        LOGIN_AS_CUSTOMER,
+        CREATE_CUSTOMER,
 
-        LOAD_COMPANY_LIST,
-        EMPTY_COMPANY_LIST,
-        CHOOSE_COMPANY_MENU,
+        COMPANIES_LIST,
         COMPANY_MENU,
         CREATE_COMPANY,
 
-        LOAD_CAR_LIST,
-        EMPTY_CAR_LIST,
         CAR_LIST,
         CREATE_CAR,
 
@@ -40,57 +38,52 @@ public class StateMachineFactory {
     private Map<String, StateTransition> createTransitionMap() {
         List<StateTransition> transList = List.of(
                 new StateTransition(State.MAIN_MENU.name(),
-                                    Map.of(1, State.MANAGER_MENU.name(),
+                                    Map.of(1, State.LOGIN_AS_MANAGER.name(),
+                                           2, State.LOGIN_AS_CUSTOMER.name(),
+                                           3, State.CREATE_CUSTOMER.name(),
                                            0, State.EXIT.name()),
                                     menus::mainMenu
                 ),
 
-                // TODO: 9/21/21 Introduce new states about a customer into the main menu
-
-                new StateTransition(State.MANAGER_MENU.name(),
-                                    Map.of(1, State.LOAD_COMPANY_LIST.name(),
+                new StateTransition(State.LOGIN_AS_MANAGER.name(),
+                                    Map.of(1, State.COMPANIES_LIST.name(),
                                            2, State.CREATE_COMPANY.name(),
                                            0, State.MAIN_MENU.name()),
                                     menus::managerMenu
                 ),
+                new StateTransition(State.LOGIN_AS_CUSTOMER.name(),
+                                    Map.of(0, State.MAIN_MENU.name()),
+                                    // TODO: 9/23/21 Change the dummy map for a real one
+                                    () -> { System.out.println("\nUnder construction..."); return 0;}
+                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
+                ),
+                new StateTransition(State.CREATE_CUSTOMER.name(),
+                                    Map.of(0, State.MAIN_MENU.name()),
+                                    // TODO: 9/23/21 Change the dummy map for a real one
+                                    () -> { System.out.println("\nUnder construction..."); return 0;}
+                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
+                ),
 
-                new StateTransition(State.LOAD_COMPANY_LIST.name(),
-                                    Map.of(0, State.EMPTY_COMPANY_LIST.name(),
-                                           1, State.CHOOSE_COMPANY_MENU.name()),
-                                    menus::loadCompanyList
-                ),
-                new StateTransition(State.EMPTY_COMPANY_LIST.name(),
-                                    Map.of(0, State.MANAGER_MENU.name()),
-                                    menus::emptyCompanyList
-                ),
-                new StateTransition(State.CHOOSE_COMPANY_MENU.name(),
-                                    Map.of(0, State.MANAGER_MENU.name(),
+                new StateTransition(State.COMPANIES_LIST.name(),
+                                    Map.of(0, State.LOGIN_AS_MANAGER.name(),
                                            1, State.COMPANY_MENU.name()),
-                                    menus::chooseCompanyMenu
+                                    menus::companiesList
                 ),
+
                 new StateTransition(State.COMPANY_MENU.name(),
-                                    Map.of(0, State.MANAGER_MENU.name(),
-                                           1, State.LOAD_CAR_LIST.name(),
+                                    Map.of(0, State.LOGIN_AS_MANAGER.name(),
+                                           1, State.CAR_LIST.name(),
                                            2, State.CREATE_CAR.name()),
                                     menus::companyMenu
                 ),
                 new StateTransition(State.CREATE_COMPANY.name(),
-                                    Map.of(0, State.MANAGER_MENU.name()),
+                                    Map.of(0, State.LOGIN_AS_MANAGER.name()),
                                     menus::createCompany
                 ),
 
-                new StateTransition(State.LOAD_CAR_LIST.name(),
-                                    Map.of(0, State.EMPTY_CAR_LIST.name(),
-                                           1, State.CAR_LIST.name()),
-                                    menus::loadCarList
-                ),
-                new StateTransition(State.EMPTY_CAR_LIST.name(),
-                                    Map.of(0, State.COMPANY_MENU.name()),
-                                    menus::emptyCarList
-                ),
                 new StateTransition(State.CAR_LIST.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
-                                    menus::carList
+                                    menus::carListAlt
                 ),
                 new StateTransition(State.CREATE_CAR.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
