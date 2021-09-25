@@ -93,10 +93,27 @@ public class StateMachineFactory {
                 ),
 
                 new StateTransition(State.CUSTOMER_MENU.name(),
-                                    Map.of(0, State.LOGIN_AS_CUSTOMER.name()),
-                                    // TODO: 9/23/21 Change the dummy map for a real one
+                                    Map.of(1, State.RENT_CAR.name(),
+                                           2, State.RETURN_RENTED_CAR.name(),
+                                           3, State.RENTED_CAR_VIEW.name(),
+                                           0, State.MAIN_MENU.name()),
+                                    menus::customerMenu
+                ),
+                new StateTransition(State.RENT_CAR.name(),
+                                    Map.of(0, State.CUSTOMER_MENU.name()),
+                                    // TODO: 9/25/21 Change the dummy map for a real one
                                     () -> { System.out.println("\nUnder construction..."); return 0;}
-                                    // TODO: 9/23/21 Change the dummy inputGenerator for a real one
+                                    // TODO: 9/25/21 Change the dummy inputGenerator for a real one
+                ),
+                new StateTransition(State.RETURN_RENTED_CAR.name(),
+                                    Map.of(0, State.CUSTOMER_MENU.name()),
+                                    // TODO: 9/25/21 Change the dummy map for a real one
+                                    () -> { System.out.println("\nUnder construction..."); return 0;}
+                                    // TODO: 9/25/21 Change the dummy inputGenerator for a real one
+                ),
+                new StateTransition(State.RENTED_CAR_VIEW.name(),
+                                    Map.of(0, State.CUSTOMER_MENU.name()),
+                                    menus::rentedCarView
                 ),
 
                 new StateTransition(State.EXIT.name(),
@@ -105,7 +122,7 @@ public class StateMachineFactory {
                 )
         );
         return Collections.unmodifiableMap(
-                transList.stream().collect(Collectors.toMap(StateTransition::getStateIndex, s -> s)));
+                transList.stream().collect(Collectors.toMap(StateTransition::getStateName, s -> s)));
     }
 
 

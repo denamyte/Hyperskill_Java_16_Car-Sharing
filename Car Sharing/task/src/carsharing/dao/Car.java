@@ -2,6 +2,7 @@ package carsharing.dao;
 
 public class Car extends IdAndName {
     private int companyId;
+    private Company company;
 
     public Car(int id, String name, int companyId) {
         super(id, name);
@@ -14,5 +15,10 @@ public class Car extends IdAndName {
 
     public void setCompanyId(int companyId) {
         this.companyId = companyId;
+    }
+
+    public Car setCompany(Company company) {
+        this.company = company;
+        return this;
     }
 }

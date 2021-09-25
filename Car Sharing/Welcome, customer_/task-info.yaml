@@ -850,34 +850,6 @@ files:
         }
     }
   learner_created: false
-- name: src/carsharing/dao/memory/CompanyDaoMemory.java
-  visible: true
-  text: |
-    package carsharing.dao.memory;
-
-    import carsharing.dao.Company;
-    import carsharing.dao.CompanyDao;
-
-    import java.util.*;
-    import java.util.concurrent.atomic.AtomicInteger;
-
-    public class CompanyDaoMemory implements CompanyDao {
-
-        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
-        private final AtomicInteger idGen = new AtomicInteger(1);
-
-        @Override
-        public List<Company> getAllCompanies() {
-            return new ArrayList<>(companyMap.values());
-        }
-
-        @Override
-        public void saveCompany(Company company) {
-            company.setId(idGen.getAndIncrement());
-            companyMap.put(company.getId(), company);
-        }
-    }
-  learner_created: true
 - name: src/carsharing/dao/CarDao.java
   visible: true
   text: |
@@ -937,70 +909,6 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/dao/h2/CarDaoH2.java
-  visible: true
-  text: |
-    package carsharing.dao.h2;
-
-    import carsharing.dao.BaseDao;
-    import carsharing.dao.Car;
-    import carsharing.dao.CarDao;
-
-    import java.sql.*;
-    import java.util.LinkedList;
-    import java.util.List;
-
-    public class CarDaoH2 extends BaseDao implements CarDao {
-
-        public static final String CREATE_TABLE_SQL =
-                "CREATE TABLE IF NOT EXISTS CAR(" +
-                        "ID INT PRIMARY KEY AUTO_INCREMENT," +
-                        "NAME VARCHAR NOT NULL UNIQUE," +
-                        "COMPANY_ID INT NOT NULL," +
-                        "CONSTRAINT fk_COMPANY FOREIGN KEY(COMPANY_ID)" +
-                        "REFERENCES COMPANY(ID));";
-        public static final String SAVE_CAR_SQL =
-                "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
-        public static final String COMPANY_CARS_SQL =
-                "SELECT ID, NAME FROM CAR " +
-                        "WHERE COMPANY_ID = ?";
-
-        public CarDaoH2(Connection conn) {
-            super(conn);
-        }
-
-        @Override
-        protected void createTable(Connection conn) throws SQLException {
-            conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
-        }
-
-        @Override
-        public List<Car> getCarsByCompanyId(int companyId) {
-            List<Car> cars = new LinkedList<>();
-            try (PreparedStatement stmt = conn.prepareStatement(COMPANY_CARS_SQL)) {
-                stmt.setInt(1, companyId);
-                final ResultSet resultSet = stmt.executeQuery();
-                while (resultSet.next()) {
-                    cars.add(new Car(resultSet.getInt("ID"), resultSet.getString("NAME"), companyId));
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            return cars;
-        }
-
-        @Override
-        public void saveCar(Car car) {
-            try (PreparedStatement stmt = conn.prepareStatement(SAVE_CAR_SQL)){
-                stmt.setString(1, car.getName());
-                stmt.setInt(2, car.getCompanyId());
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-  learner_created: true
 - name: src/carsharing/dao/BaseDao.java
   visible: true
   text: |
@@ -1024,6 +932,223 @@ files:
 
         protected abstract void createTable(Connection conn) throws SQLException;
     }
+  learner_created: true
+- name: src/carsharing/dao/memory/CarDaoMemory.java
+  visible: true
+  text: |
+    package carsharing.dao.memory;
+
+    import carsharing.dao.Car;
+    import carsharing.dao.CarDao;
+
+    import java.util.LinkedHashMap;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.stream.Collectors;
+
+    public class CarDaoMemory implements CarDao {
+
+        private final Map<Integer, Car> carMap = new LinkedHashMap<>();
+
+        @Override
+        public List<Car> getCarsByCompanyId(int companyId) {
+            return carMap.values().stream().filter(car -> car.getCompanyId() == companyId).collect(Collectors.toList());
+        }
+
+        @Override
+        public void saveCar(Car car) {
+            car.setId(carMap.size() + 1);
+            carMap.put(car.getId(), car);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/state/model/StateTransition.java
+  visible: true
+  text: |
+    package carsharing.state.model;
+
+    import java.util.Map;
+    import java.util.function.IntSupplier;
+
+    /**
+     * The purpose of this class is to call the function
+     * <code>toggleState()</code> that toggles the state of
+     * this instance to one of the predefined states,
+     * based on user choice.
+     */
+    public class StateTransition {
+
+        private final String stateIndex;
+        //                input    next state name
+        private final Map<Integer, String> inputToStateMap;
+        private final IntSupplier inputGenerator;
+
+        public StateTransition(String stateIndex,
+                               Map<Integer, String> inputToStateMap,
+                               IntSupplier inputGenerator) {
+            this.stateIndex = stateIndex;
+            this.inputToStateMap = inputToStateMap;
+            this.inputGenerator = inputGenerator;
+        }
+
+        public String toggleState() {
+            return inputToStateMap.get(inputGenerator.getAsInt());
+        }
+
+        public String getStateIndex() {
+            return stateIndex;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/ConnectionHolder.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.sql.Connection;
+
+    public interface ConnectionHolder {
+        Connection getConnection();
+    }
+  learner_created: true
+- name: src/carsharing/dao/CompanyDao.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    import java.util.List;
+
+    public interface CompanyDao {
+
+        List<Company> getAllCompanies();
+
+        void saveCompany(Company company);
+    }
+  learner_created: true
+- name: src/carsharing/state/model/StateMachineController.java
+  visible: true
+  text: |
+    package carsharing.state.model;
+
+    import java.util.Map;
+
+    public class StateMachineController {
+        private final Map<String, StateTransition> transitionMap;
+        private String state;
+
+        public StateMachineController(Map<String, StateTransition> transitionMap, String startingStateName) {
+            this.transitionMap = transitionMap;
+            this.state = startingStateName;
+        }
+
+        public void run() {
+            while (state != null && !state.isEmpty()) {
+                state = transitionMap.get(state).toggleState();
+            }
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/Company.java
+  visible: true
+  text: |
+    package carsharing.dao;
+
+    public class Company {
+        private int id;
+        private String name;
+
+        public Company(String name) {
+            this.name = name;
+        }
+
+        public Company(int id, String name) {
+            this(name);
+            this.id = id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "Car{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/Customer.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/IdAndName.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/h2/H2ConnectionHolder.java
+  visible: true
+  text: |
+    package carsharing.dao.h2;
+
+    import carsharing.dao.ConnectionHolder;
+
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.SQLException;
+
+    public class H2ConnectionHolder implements ConnectionHolder {
+
+        private Connection conn;
+
+        private static Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
+            Class.forName ("org.h2.Driver");
+            return DriverManager.getConnection("jdbc:h2:./src/carsharing/db/" + dbName);
+        }
+
+        public H2ConnectionHolder(String dbName) {
+            try {
+                conn = createConnection(dbName);
+                conn.setAutoCommit(true);
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public Connection getConnection() {
+            return conn;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/Main.java
+  visible: true
+  text: |-
+    package carsharing;
+
+    public class Main {
+
+        public static void main(String[] args) {
+            // write your code here
+        }
+    }
+  learner_created: false
+- name: src/carsharing/dao/memory/CustomerDaoMemory.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/memory/AbstractDaoMemory.java
+  visible: true
   learner_created: true
 - name: src/carsharing/dao/h2/CompanyDaoH2.java
   visible: true
@@ -1085,6 +1210,9 @@ files:
         }
 
     }
+  learner_created: true
+- name: src/carsharing/dao/h2/CustomerDaoH2.java
+  visible: true
   learner_created: true
 - name: src/carsharing/state/CurrentStateDataFacade.java
   visible: true
@@ -1164,73 +1292,6 @@ files:
 
         public boolean areThereCars() {
             return !cars.isEmpty();
-        }
-    }
-  learner_created: true
-- name: src/carsharing/dao/memory/CarDaoMemory.java
-  visible: true
-  text: |
-    package carsharing.dao.memory;
-
-    import carsharing.dao.Car;
-    import carsharing.dao.CarDao;
-
-    import java.util.LinkedHashMap;
-    import java.util.List;
-    import java.util.Map;
-    import java.util.stream.Collectors;
-
-    public class CarDaoMemory implements CarDao {
-
-        private final Map<Integer, Car> carMap = new LinkedHashMap<>();
-
-        @Override
-        public List<Car> getCarsByCompanyId(int companyId) {
-            return carMap.values().stream().filter(car -> car.getCompanyId() == companyId).collect(Collectors.toList());
-        }
-
-        @Override
-        public void saveCar(Car car) {
-            car.setId(carMap.size() + 1);
-            carMap.put(car.getId(), car);
-        }
-    }
-  learner_created: true
-- name: src/carsharing/state/model/StateTransition.java
-  visible: true
-  text: |
-    package carsharing.state.model;
-
-    import java.util.Map;
-    import java.util.function.IntSupplier;
-
-    /**
-     * The purpose of this class is to call the function
-     * <code>toggleState()</code> that toggles the state of
-     * this instance to one of the predefined states,
-     * based on user choice.
-     */
-    public class StateTransition {
-
-        private final String stateIndex;
-        //                input    next state name
-        private final Map<Integer, String> inputToStateMap;
-        private final IntSupplier inputGenerator;
-
-        public StateTransition(String stateIndex,
-                               Map<Integer, String> inputToStateMap,
-                               IntSupplier inputGenerator) {
-            this.stateIndex = stateIndex;
-            this.inputToStateMap = inputToStateMap;
-            this.inputGenerator = inputGenerator;
-        }
-
-        public String toggleState() {
-            return inputToStateMap.get(inputGenerator.getAsInt());
-        }
-
-        public String getStateIndex() {
-            return stateIndex;
         }
     }
   learner_created: true
@@ -1333,149 +1394,72 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/dao/ConnectionHolder.java
-  visible: true
-  text: |
-    package carsharing.dao;
-
-    import java.sql.Connection;
-
-    public interface ConnectionHolder {
-        Connection getConnection();
-    }
-  learner_created: true
-- name: src/carsharing/dao/CompanyDao.java
-  visible: true
-  text: |
-    package carsharing.dao;
-
-    import java.util.List;
-
-    public interface CompanyDao {
-
-        List<Company> getAllCompanies();
-
-        void saveCompany(Company company);
-    }
-  learner_created: true
-- name: src/carsharing/state/model/StateMachineController.java
-  visible: true
-  text: |
-    package carsharing.state.model;
-
-    import java.util.Map;
-
-    public class StateMachineController {
-        private final Map<String, StateTransition> transitionMap;
-        private String state;
-
-        public StateMachineController(Map<String, StateTransition> transitionMap, String startingStateName) {
-            this.transitionMap = transitionMap;
-            this.state = startingStateName;
-        }
-
-        public void run() {
-            while (state != null && !state.isEmpty()) {
-                state = transitionMap.get(state).toggleState();
-            }
-        }
-    }
-  learner_created: true
-- name: src/carsharing/dao/Company.java
-  visible: true
-  text: |
-    package carsharing.dao;
-
-    public class Company {
-        private int id;
-        private String name;
-
-        public Company(String name) {
-            this.name = name;
-        }
-
-        public Company(int id, String name) {
-            this(name);
-            this.id = id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return "Car{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    '}';
-        }
-    }
-  learner_created: true
-- name: src/carsharing/dao/Customer.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/IdAndName.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/CustomerDao.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/memory/CustomerDaoMemory.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/memory/AbstractDaoMemory.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/h2/CustomerDaoH2.java
-  visible: true
-  learner_created: true
-- name: src/carsharing/dao/h2/H2ConnectionHolder.java
+- name: src/carsharing/dao/h2/CarDaoH2.java
   visible: true
   text: |
     package carsharing.dao.h2;
 
-    import carsharing.dao.ConnectionHolder;
+    import carsharing.dao.BaseDao;
+    import carsharing.dao.Car;
+    import carsharing.dao.CarDao;
 
-    import java.sql.Connection;
-    import java.sql.DriverManager;
-    import java.sql.SQLException;
+    import java.sql.*;
+    import java.util.LinkedList;
+    import java.util.List;
 
-    public class H2ConnectionHolder implements ConnectionHolder {
+    public class CarDaoH2 extends BaseDao implements CarDao {
 
-        private Connection conn;
+        public static final String CREATE_TABLE_SQL =
+                "CREATE TABLE IF NOT EXISTS CAR(" +
+                        "ID INT PRIMARY KEY AUTO_INCREMENT," +
+                        "NAME VARCHAR NOT NULL UNIQUE," +
+                        "COMPANY_ID INT NOT NULL," +
+                        "CONSTRAINT fk_COMPANY FOREIGN KEY(COMPANY_ID)" +
+                        "REFERENCES COMPANY(ID));";
+        public static final String SAVE_CAR_SQL =
+                "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
+        public static final String COMPANY_CARS_SQL =
+                "SELECT ID, NAME FROM CAR " +
+                        "WHERE COMPANY_ID = ?";
 
-        private static Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
-            Class.forName ("org.h2.Driver");
-            return DriverManager.getConnection("jdbc:h2:./src/carsharing/db/" + dbName);
-        }
-
-        public H2ConnectionHolder(String dbName) {
-            try {
-                conn = createConnection(dbName);
-                conn.setAutoCommit(true);
-            } catch (SQLException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        public CarDaoH2(Connection conn) {
+            super(conn);
         }
 
         @Override
-        public Connection getConnection() {
-            return conn;
+        protected void createTable(Connection conn) throws SQLException {
+            conn.createStatement().executeUpdate(CREATE_TABLE_SQL);
+        }
+
+        @Override
+        public List<Car> getCarsByCompanyId(int companyId) {
+            List<Car> cars = new LinkedList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(COMPANY_CARS_SQL)) {
+                stmt.setInt(1, companyId);
+                final ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    cars.add(new Car(resultSet.getInt("ID"), resultSet.getString("NAME"), companyId));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return cars;
+        }
+
+        @Override
+        public void saveCar(Car car) {
+            try (PreparedStatement stmt = conn.prepareStatement(SAVE_CAR_SQL)){
+                stmt.setString(1, car.getName());
+                stmt.setInt(2, car.getCompanyId());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+  learner_created: true
+- name: src/carsharing/dao/CustomerDao.java
+  visible: true
   learner_created: true
 - name: src/carsharing/state/StateMachineFactory.java
   visible: true
@@ -1587,18 +1571,34 @@ files:
 
     }
   learner_created: true
-- name: src/carsharing/Main.java
+- name: src/carsharing/dao/memory/CompanyDaoMemory.java
   visible: true
-  text: |-
-    package carsharing;
+  text: |
+    package carsharing.dao.memory;
 
-    public class Main {
+    import carsharing.dao.Company;
+    import carsharing.dao.CompanyDao;
 
-        public static void main(String[] args) {
-            // write your code here
+    import java.util.*;
+    import java.util.concurrent.atomic.AtomicInteger;
+
+    public class CompanyDaoMemory implements CompanyDao {
+
+        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
+        private final AtomicInteger idGen = new AtomicInteger(1);
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return new ArrayList<>(companyMap.values());
+        }
+
+        @Override
+        public void saveCompany(Company company) {
+            company.setId(idGen.getAndIncrement());
+            companyMap.put(company.getId(), company);
         }
     }
-  learner_created: false
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/761/implement#comment
 status: Unchecked
 record: -1

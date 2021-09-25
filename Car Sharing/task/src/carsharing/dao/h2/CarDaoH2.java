@@ -1,8 +1,6 @@
 package carsharing.dao.h2;
 
-import carsharing.dao.BaseDao;
-import carsharing.dao.Car;
-import carsharing.dao.CarDao;
+import carsharing.dao.*;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -22,6 +20,11 @@ public class CarDaoH2 extends BaseDao implements CarDao {
                     "WHERE COMPANY_ID = ?";
     public static final String SAVE_CAR_SQL =
             "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
+    public static final String GET_CAR_BY_ID_SQL =
+            "SELECT c.NAME CAR_NAME, co.ID CO_ID, co.NAME CO_NAME FROM CAR c" +
+                    "JOIN COMPANY co" +
+                    "ON c.COMPANY_ID = co.ID" +
+                    "WHERE c.ID = ?";
 
     public CarDaoH2(Connection conn) {
         super(conn);
@@ -56,5 +59,21 @@ public class CarDaoH2 extends BaseDao implements CarDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Car getCarById(int carId) {
+        try (PreparedStatement stmt = conn.prepareStatement(GET_CAR_BY_ID_SQL)) {
+            stmt.setInt(1, carId);
+            final ResultSet resultSet = stmt.executeQuery();
+            if (resultSet.next()) {
+                final int companyId = resultSet.getInt("CO_ID");
+                return new Car(carId, resultSet.getString("CAR_NAME"), companyId)
+                        .setCompany(new Company(companyId, resultSet.getString("CO_NAME")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

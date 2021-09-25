@@ -1,6 +1,6 @@
 package carsharing;
 
-import carsharing.dao.IdAndName;
+import carsharing.dao.*;
 import carsharing.state.CurrentStateDataFacade;
 
 import java.util.List;
@@ -29,12 +29,12 @@ public class CarSharingMenus {
     }
 
     public int companiesListChoice() {
-        dataFacade.loadCompanies();
-        if (dataFacade.noCompanies()) {
+        final List<Company> companies = dataFacade.getCompanies();
+        if (companies.isEmpty()) {
             System.out.println("\nThe company list is empty!");
             return 0;
         }
-        printItemsList(dataFacade.getCompanies(), "\nChoose a company:", "0. Back");
+        printItemsList(companies, "\nChoose a company:", "0. Back");
         int choice = userChoice();
         if (choice == 0) {
             return 0;
@@ -53,22 +53,22 @@ public class CarSharingMenus {
     }
 
     public int carList() {
-        dataFacade.loadSelectedCompanyCars();
-        if (dataFacade.noCars()) {
+        final List<Car> cars = dataFacade.getCars();
+        if (cars.isEmpty()) {
             System.out.println("\nThe car list is empty!");
         } else {
-            printItemsList(dataFacade.getCars(), "\nCar list:", null);
+            printItemsList(cars, "\nCar list:", null);
         }
         return 0;
     }
 
     public int customerListChoice() {
-        dataFacade.loadCustomers();
-        if (dataFacade.noCustomers()) {
+        final List<Customer> customers = dataFacade.getCustomers();
+        if (customers.isEmpty()) {
             System.out.println("\nThe customer list is empty!");
             return 0;
         }
-        printItemsList(dataFacade.getCustomers(), "\nCustomer list:", "0. Back");
+        printItemsList(customers, "\nCustomer list:", "0. Back");
         int choice = userChoice();
         if (choice == 0) {
             return 0;
@@ -78,15 +78,38 @@ public class CarSharingMenus {
         }
     }
 
+    public int customerMenu() {
+        System.out.println("\n1. Rent a car\n2. Return a rented car\n3. My rented car\n0. Back");
+        return userChoice();
+    }
+
+    public int rentedCarView() {
+        Car car = dataFacade.getRentedCarOfSelectedCustomer();
+        if (car == null) {
+            didNotRentMessage();
+        } else {
+            // TODO: 9/25/21 Show rented car
+            System.out.println("\nTODO: Show a rented car...");
+        }
+        return 0;
+    }
+
+    private void didNotRentMessage() {
+        System.out.println("\nYou didn't rent a car!");
+    }
+
     public int createCompany() {
+        dataFacade.flushCompanies();
         return saveTemplate("\nEnter the company name:", dataFacade::saveCompany, "The company was created!");
     }
 
     public int createCar() {
+        dataFacade.flushCars();
         return saveTemplate("\nEnter the car name:", dataFacade::saveCar, "The car was added!");
     }
 
     public int createCustomer() {
+        dataFacade.flushCustomers();
         return saveTemplate("\nEnter the customer name:", dataFacade::saveCustomer, "The customer was added!");
     }
 

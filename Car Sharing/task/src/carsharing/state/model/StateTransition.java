@@ -11,15 +11,15 @@ import java.util.function.IntSupplier;
  */
 public class StateTransition {
 
-    private final String stateIndex;
+    private final String stateName;
     //                input    next state name
     private final Map<Integer, String> inputToStateMap;
     private final IntSupplier inputGenerator;
 
-    public StateTransition(String stateIndex,
+    public StateTransition(String stateName,
                            Map<Integer, String> inputToStateMap,
                            IntSupplier inputGenerator) {
-        this.stateIndex = stateIndex;
+        this.stateName = stateName;
         this.inputToStateMap = inputToStateMap;
         this.inputGenerator = inputGenerator;
     }
@@ -28,7 +28,7 @@ public class StateTransition {
         return inputToStateMap.get(inputGenerator.getAsInt());
     }
 
-    public String getStateIndex() {
-        return stateIndex;
+    public String getStateName() {
+        return stateName;
     }
 }

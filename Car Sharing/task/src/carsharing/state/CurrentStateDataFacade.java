@@ -22,26 +22,23 @@ public class CurrentStateDataFacade {
         this.customerDao = customerDao;
     }
 
-    public void loadCompanies() {
-        companies = companyDao.getAllCompanies();
-    }
-
     public List<Company> getCompanies() {
         if (companies.isEmpty()) {
-            loadCompanies();
+            companies = companyDao.getAllCompanies();
         }
         return companies;
     }
 
     public void saveCompany(String companyName) {
-        companies = Collections.emptyList();  // Invalidate companies cache
         companyDao.saveCompany(companyName);
     }
 
+    public void flushCompanies() {
+        companies = Collections.emptyList();
+    }
+
     public void setSelectedCompany(int choice) {
-        selectedCompany = companies.stream()
-                .skip(choice - 1)
-                .findFirst().orElseThrow();
+        selectedCompany = selectItemByIndex(companies, choice);
         selectedCompanyPrinted = false;
     }
 
@@ -55,29 +52,24 @@ public class CurrentStateDataFacade {
         return result;
     }
 
-    public void loadSelectedCompanyCars() {
-        cars = carDao.getCarsByCompanyId(selectedCompany.getId());
-    }
-
     public List<Car> getCars() {
         if (cars.isEmpty()) {
-            loadSelectedCompanyCars();
+            cars = carDao.getCarsByCompanyId(selectedCompany.getId());
         }
         return cars;
     }
 
     public void saveCar(String carName) {
-        cars = Collections.emptyList();  // Invalidate cars cache
         carDao.saveCar(new Car(0, carName, selectedCompany.getId()));
     }
 
-    public void loadCustomers() {
-        customers = customerDao.getAllCustomers();
+    public void flushCars() {
+        cars = Collections.emptyList();
     }
 
     public List<Customer> getCustomers() {
         if (customers.isEmpty()) {
-            loadCustomers();
+            customers = customerDao.getAllCustomers();
         }
         return customers;
     }
@@ -87,21 +79,23 @@ public class CurrentStateDataFacade {
         customerDao.saveCustomer(customerName);
     }
 
+    public void flushCustomers() {
+        customers = Collections.emptyList();
+    }
+
     public void setSelectedCustomer(int choice) {
-        selectedCustomer = customers.stream()
+        selectedCustomer = selectItemByIndex(customers, choice);
+    }
+
+    public Car getRentedCarOfSelectedCustomer() {
+        return selectedCustomer == null || selectedCustomer.getCarId() == 0
+                ? null
+                : carDao.getCarById(selectedCustomer.getCarId());
+    }
+
+    private <T> T selectItemByIndex(List<T> items, int choice) {
+        return items.stream()
                 .skip(choice - 1)
                 .findFirst().orElseThrow();
-    }
-
-    public boolean noCompanies() {
-        return companies.isEmpty();
-    }
-
-    public boolean noCars() {
-        return cars.isEmpty();
-    }
-
-    public boolean noCustomers() {
-        return customers.isEmpty();
     }
 }
