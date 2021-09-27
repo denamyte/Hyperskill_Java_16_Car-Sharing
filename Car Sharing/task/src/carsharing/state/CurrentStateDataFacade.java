@@ -13,6 +13,7 @@ public class CurrentStateDataFacade {
     private Company selectedCompany;
     private boolean selectedCompanyPrinted;
     private List<Car> cars = Collections.emptyList();
+    private Car selectedCar;
     private List<Customer> customers = Collections.emptyList();
     private Customer selectedCustomer;
 
@@ -42,8 +43,8 @@ public class CurrentStateDataFacade {
         selectedCompanyPrinted = false;
     }
 
-    public Company getSelectedCompany() {
-        return selectedCompany;
+    public String getSelectedCompanyName() {
+        return selectedCompany == null ? "" : selectedCompany.getName();
     }
 
     public boolean canPrintSelectedCompany() {
@@ -88,9 +89,29 @@ public class CurrentStateDataFacade {
     }
 
     public Car getRentedCarOfSelectedCustomer() {
-        return selectedCustomer == null || selectedCustomer.getCarId() == 0
-                ? null
-                : carDao.getCarById(selectedCustomer.getCarId());
+        return carDao.getCarById(selectedCustomer.getCarId());
+    }
+
+    public boolean carIsRentedBySelectedCustomer() {
+        return selectedCustomer != null && selectedCustomer.getCarId() > 0;
+    }
+
+    public void returnRentedCar() {
+        customerDao.returnRentedCar(selectedCustomer.getId());
+        selectedCustomer.setCarId(0);
+    }
+
+    public void setSelectedCar(int choice) {
+        selectedCar = selectItemByIndex(cars, choice);
+    }
+
+    public String getSelectedCarName() {
+        return selectedCar == null ? "" : selectedCar.getName();
+    }
+
+    public void rentCar() {
+        customerDao.rentCar(selectedCustomer.getId(), selectedCar.getId());
+        selectedCustomer.setCarId(selectedCar.getId());
     }
 
     private <T> T selectItemByIndex(List<T> items, int choice) {

@@ -1094,9 +1094,6 @@ files:
 - name: src/carsharing/dao/Customer.java
   visible: true
   learner_created: true
-- name: src/carsharing/dao/IdAndName.java
-  visible: true
-  learner_created: true
 - name: src/carsharing/dao/h2/H2ConnectionHolder.java
   visible: true
   text: |
@@ -1210,6 +1207,40 @@ files:
         }
 
     }
+  learner_created: true
+- name: src/carsharing/dao/CustomerDao.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/dao/memory/CompanyDaoMemory.java
+  visible: true
+  text: |
+    package carsharing.dao.memory;
+
+    import carsharing.dao.Company;
+    import carsharing.dao.CompanyDao;
+
+    import java.util.*;
+    import java.util.concurrent.atomic.AtomicInteger;
+
+    public class CompanyDaoMemory implements CompanyDao {
+
+        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
+        private final AtomicInteger idGen = new AtomicInteger(1);
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return new ArrayList<>(companyMap.values());
+        }
+
+        @Override
+        public void saveCompany(Company company) {
+            company.setId(idGen.getAndIncrement());
+            companyMap.put(company.getId(), company);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/dao/BaseItem.java
+  visible: true
   learner_created: true
 - name: src/carsharing/dao/h2/CustomerDaoH2.java
   visible: true
@@ -1458,9 +1489,6 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/dao/CustomerDao.java
-  visible: true
-  learner_created: true
 - name: src/carsharing/state/StateMachineFactory.java
   visible: true
   text: |
@@ -1571,34 +1599,86 @@ files:
 
     }
   learner_created: true
-- name: src/carsharing/dao/memory/CompanyDaoMemory.java
-  visible: true
-  text: |
-    package carsharing.dao.memory;
-
-    import carsharing.dao.Company;
-    import carsharing.dao.CompanyDao;
-
-    import java.util.*;
-    import java.util.concurrent.atomic.AtomicInteger;
-
-    public class CompanyDaoMemory implements CompanyDao {
-
-        private final Map<Integer, Company> companyMap = new LinkedHashMap<>();
-        private final AtomicInteger idGen = new AtomicInteger(1);
-
-        @Override
-        public List<Company> getAllCompanies() {
-            return new ArrayList<>(companyMap.values());
-        }
-
-        @Override
-        public void saveCompany(Company company) {
-            company.setId(idGen.getAndIncrement());
-            companyMap.put(company.getId(), company);
-        }
-    }
-  learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/761/implement#comment
-status: Unchecked
+status: Failed
+feedback:
+  message: |-
+    Wrong answer in test #10
+
+    You shouldn&#39;t print out a car if it is already rented!
+
+    Please find below the output of your program during this failed test.
+    Note that the &#39;&gt;&#39; character indicates the beginning of the input line.
+
+    ---
+
+    Arguments: -databaseFileName carsharing
+
+    1. Log in as a manager
+    2. Log in as a customer
+    3. Create a customer
+    0. Exit
+    &gt; 2
+
+    Customer list:
+    1. First customer
+    2. Second customer
+    0. Back
+    &gt; 2
+
+    1. Rent a car
+    2. Return a rented car
+    3. My rented car
+    0. Back
+    &gt; 1
+
+    Choose a company:
+    1. Car To Go
+    2. Drive Now
+    0. Back
+    &gt; 1
+
+    Choose a car:
+    1. Hyundai Venue
+    2. Maruti Suzuki Dzire
+    0. Back
+    &gt; 1
+
+    You rented &#39;Hyundai Venue&#39;
+
+    1. Rent a car
+    2. Return a rented car
+    3. My rented car
+    0. Back
+    &gt; 0
+
+    1. Log in as a manager
+    2. Log in as a customer
+    3. Create a customer
+    0. Exit
+    &gt; 2
+
+    Customer list:
+    1. First customer
+    2. Second customer
+    0. Back
+    &gt; 1
+
+    1. Rent a car
+    2. Return a rented car
+    3. My rented car
+    0. Back
+    &gt; 1
+
+    Choose a company:
+    1. Car To Go
+    2. Drive Now
+    0. Back
+    &gt; 1
+
+    Choose a car:
+    1. Hyundai Venue
+    2. Maruti Suzuki Dzire
+    0. Back
+  time: Mon, 27 Sep 2021 00:20:34 UTC
 record: -1

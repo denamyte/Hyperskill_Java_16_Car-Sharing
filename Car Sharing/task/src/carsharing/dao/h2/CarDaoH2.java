@@ -21,9 +21,9 @@ public class CarDaoH2 extends BaseDao implements CarDao {
     public static final String SAVE_CAR_SQL =
             "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
     public static final String GET_CAR_BY_ID_SQL =
-            "SELECT c.NAME CAR_NAME, co.ID CO_ID, co.NAME CO_NAME FROM CAR c" +
-                    "JOIN COMPANY co" +
-                    "ON c.COMPANY_ID = co.ID" +
+            "SELECT c.NAME CAR_NAME, co.ID CO_ID, co.NAME CO_NAME FROM CAR c " +
+                    "JOIN COMPANY co " +
+                    "ON c.COMPANY_ID = co.ID " +
                     "WHERE c.ID = ?";
 
     public CarDaoH2(Connection conn) {
@@ -37,6 +37,9 @@ public class CarDaoH2 extends BaseDao implements CarDao {
 
     @Override
     public List<Car> getCarsByCompanyId(int companyId) {
+
+        // TODO: 9/27/21 The cars returned shouldn't be rented by a customer (some JOIN with CUSTOMER table needed)
+
         List<Car> cars = new LinkedList<>();
         try (PreparedStatement stmt = conn.prepareStatement(COMPANY_CARS_SQL)) {
             stmt.setInt(1, companyId);

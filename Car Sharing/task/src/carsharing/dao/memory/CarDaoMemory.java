@@ -21,7 +21,7 @@ public class CarDaoMemory extends AbstractDaoMemory<Car> implements CarDao {
 
     @Override
     public Car getCarById(int carId) {
-        return itemMap.get(carId);
+        return getById(carId);
     }
 
 }

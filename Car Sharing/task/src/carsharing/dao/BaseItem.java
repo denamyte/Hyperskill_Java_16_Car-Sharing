@@ -1,10 +1,10 @@
 package carsharing.dao;
 
-public class IdAndName {
+public class BaseItem {
     protected int id;
     protected String name;
 
-    public IdAndName(int id, String name) {
+    public BaseItem(int id, String name) {
         this.name = name;
         this.id = id;
     }

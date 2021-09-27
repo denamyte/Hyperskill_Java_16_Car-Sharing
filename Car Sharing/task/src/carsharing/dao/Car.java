@@ -1,6 +1,6 @@
 package carsharing.dao;
 
-public class Car extends IdAndName {
+public class Car extends BaseItem {
     private int companyId;
     private Company company;
 
@@ -20,5 +20,9 @@ public class Car extends IdAndName {
     public Car setCompany(Company company) {
         this.company = company;
         return this;
+    }
+
+    public String getCompanyName() {
+        return company == null ? "" : company.getName();
     }
 }

@@ -2,6 +2,7 @@ package carsharing.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public abstract class BaseDao {
 
@@ -9,15 +10,15 @@ public abstract class BaseDao {
 
     public BaseDao(Connection conn) {
         this.conn = conn;
-        try {
-            createTable(conn);
+        createTable();
+    }
+
+    private void createTable() {
+        try (Statement stmt = conn.createStatement()){
+            stmt.executeUpdate(getCreateTableSQL());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    protected void createTable(Connection conn) throws SQLException {
-        conn.createStatement().executeUpdate(getCreateTableSQL());
     }
 
     protected abstract String getCreateTableSQL();

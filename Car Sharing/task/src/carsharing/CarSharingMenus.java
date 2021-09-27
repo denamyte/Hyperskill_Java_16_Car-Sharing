@@ -40,26 +40,36 @@ public class CarSharingMenus {
             return 0;
         } else {
             dataFacade.setSelectedCompany(choice);
+            dataFacade.flushCars();
             return 1;
         }
     }
 
     public int companyMenu() {
         if (dataFacade.canPrintSelectedCompany()) {
-            System.out.printf("\n'%s' company", dataFacade.getSelectedCompany().getName());
+            System.out.printf("\n'%s' company", dataFacade.getSelectedCompanyName());
         }
         System.out.println("\n1. Car list\n2. Create a car\n0. Back");
         return userChoice();
     }
 
-    public int carList() {
+    public int viewCarListAsCompany() {
+        carList("\nThe car list is empty!", "\nCar list:", null);
+        return 0;
+    }
+
+    public void viewCarListAsCustomer(String companyName) {
+        carList(String.format("\nNo available cars in the %s company\n", companyName),
+                "\nChoose a car:", "0. Back");
+    }
+
+    private void carList(String emptyListMessage, String listPrefix, String listSuffix) {
         final List<Car> cars = dataFacade.getCars();
         if (cars.isEmpty()) {
-            System.out.println("\nThe car list is empty!");
+            System.out.println(emptyListMessage);
         } else {
-            printItemsList(cars, "\nCar list:", null);
+            printItemsList(cars, listPrefix, listSuffix);
         }
-        return 0;
     }
 
     public int customerListChoice() {
@@ -83,13 +93,44 @@ public class CarSharingMenus {
         return userChoice();
     }
 
-    public int rentedCarView() {
-        Car car = dataFacade.getRentedCarOfSelectedCustomer();
-        if (car == null) {
-            didNotRentMessage();
+    public int rentCar() {
+        if (dataFacade.carIsRentedBySelectedCustomer()) {
+            System.out.println("\nYou've already rented a car!");
+            return 0;
         } else {
-            // TODO: 9/25/21 Show rented car
-            System.out.println("\nTODO: Show a rented car...");
+            final int companiesChoice = companiesListChoice();
+            if (companiesChoice != 0) {
+                viewCarListAsCustomer(dataFacade.getSelectedCompanyName());
+                if (dataFacade.getCars().isEmpty()) {
+                    return 0;
+                }
+                final int carsChoice = userChoice();
+                if (carsChoice > 0) {
+                    dataFacade.setSelectedCar(carsChoice);
+                    dataFacade.rentCar();
+                    System.out.printf("\nYou rented '%s'\n", dataFacade.getSelectedCarName());
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int returnRentedCar() {
+        if (dataFacade.carIsRentedBySelectedCustomer()) {
+            dataFacade.returnRentedCar();
+            System.out.println("\nYou've returned a rented car!");
+        } else {
+            didNotRentMessage();
+        }
+        return 0;
+    }
+
+    public int viewRentedCar() {
+        if (dataFacade.carIsRentedBySelectedCustomer()) {
+            Car car = dataFacade.getRentedCarOfSelectedCustomer();
+            System.out.printf("\nYour rented car:\n%s\nCompany:\n%s\n", car.getName(), car.getCompanyName());
+        } else {
+            didNotRentMessage();
         }
         return 0;
     }
@@ -120,7 +161,7 @@ public class CarSharingMenus {
         return 0;
     }
 
-    private <T extends IdAndName> void printItemsList(List<T> items, String prefix, String suffix) {
+    private <T extends BaseItem> void printItemsList(List<T> items, String prefix, String suffix) {
         if (prefix != null) {
             System.out.println(prefix);
         }

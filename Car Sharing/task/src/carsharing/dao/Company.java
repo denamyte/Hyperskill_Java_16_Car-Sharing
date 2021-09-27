@@ -1,6 +1,6 @@
 package carsharing.dao;
 
-public class Company extends IdAndName {
+public class Company extends BaseItem {
     public Company(int id, String name) {
         super(id, name);
     }

@@ -24,10 +24,10 @@ public class StateMachineFactory {
         CAR_LIST,
         CREATE_CAR,
 
-        CUSTOMER_MENU,  // NEW
-        RENT_CAR,  // NEW
-        RETURN_RENTED_CAR,  // NEW
-        RENTED_CAR_VIEW,  // NEW
+        CUSTOMER_MENU,
+        RENT_CAR,
+        RETURN_RENTED_CAR,
+        RENTED_CAR_VIEW,
 
         EXIT
     }
@@ -85,7 +85,7 @@ public class StateMachineFactory {
 
                 new StateTransition(State.CAR_LIST.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
-                                    menus::carList
+                                    menus::viewCarListAsCompany
                 ),
                 new StateTransition(State.CREATE_CAR.name(),
                                     Map.of(0, State.COMPANY_MENU.name()),
@@ -101,19 +101,15 @@ public class StateMachineFactory {
                 ),
                 new StateTransition(State.RENT_CAR.name(),
                                     Map.of(0, State.CUSTOMER_MENU.name()),
-                                    // TODO: 9/25/21 Change the dummy map for a real one
-                                    () -> { System.out.println("\nUnder construction..."); return 0;}
-                                    // TODO: 9/25/21 Change the dummy inputGenerator for a real one
+                                    menus::rentCar
                 ),
                 new StateTransition(State.RETURN_RENTED_CAR.name(),
                                     Map.of(0, State.CUSTOMER_MENU.name()),
-                                    // TODO: 9/25/21 Change the dummy map for a real one
-                                    () -> { System.out.println("\nUnder construction..."); return 0;}
-                                    // TODO: 9/25/21 Change the dummy inputGenerator for a real one
+                                    menus::returnRentedCar
                 ),
                 new StateTransition(State.RENTED_CAR_VIEW.name(),
                                     Map.of(0, State.CUSTOMER_MENU.name()),
-                                    menus::rentedCarView
+                                    menus::viewRentedCar
                 ),
 
                 new StateTransition(State.EXIT.name(),

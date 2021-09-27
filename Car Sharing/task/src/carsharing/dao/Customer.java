@@ -1,6 +1,6 @@
 package carsharing.dao;
 
-public class Customer extends IdAndName {
+public class Customer extends BaseItem {
     private int carId;
 
     public Customer(int id, String name) {

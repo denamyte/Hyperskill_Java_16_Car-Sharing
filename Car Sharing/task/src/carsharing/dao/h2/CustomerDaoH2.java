@@ -21,6 +21,10 @@ public class CustomerDaoH2 extends BaseDao implements CustomerDao {
             "SELECT ID, NAME, RENTED_CAR_ID FROM CUSTOMER;";
     public static final String SAVE_CUSTOMER_SQL =
             "INSERT INTO CUSTOMER(NAME) VALUES(?)";
+    public static final String RENT_CAR_SQL =
+            "UPDATE CUSTOMER SET RENTED_CAR_ID = ? WHERE ID = ?";
+    public static final String RETURN_RENTED_CAR_SQL =
+            "UPDATE CUSTOMER SET RENTED_CAR_ID = NULL WHERE ID = ?";
 
     public CustomerDaoH2(Connection conn) {
         super(conn);
@@ -50,6 +54,27 @@ public class CustomerDaoH2 extends BaseDao implements CustomerDao {
     public void saveCustomer(String customerName) {
         try (PreparedStatement stmt = conn.prepareStatement(SAVE_CUSTOMER_SQL)) {
             stmt.setString(1, customerName);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void rentCar(int customerId, int carId) {
+        try (PreparedStatement stmt = conn.prepareStatement(RENT_CAR_SQL)){
+            stmt.setInt(1, carId);
+            stmt.setInt(2, customerId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void returnRentedCar(int customerId) {
+        try (PreparedStatement stmt = conn.prepareStatement(RETURN_RENTED_CAR_SQL)) {
+            stmt.setInt(1, customerId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
