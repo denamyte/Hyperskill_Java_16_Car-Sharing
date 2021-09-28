@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface CarDao {
 
-    List<Car> getCarsByCompanyId(int companyId);
+    List<Car> getCarsByCompany(int companyId, boolean includeRented);
 
     void saveCar(Car car);
 

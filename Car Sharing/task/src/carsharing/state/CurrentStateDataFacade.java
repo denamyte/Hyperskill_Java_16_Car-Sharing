@@ -12,8 +12,6 @@ public class CurrentStateDataFacade {
     private List<Company> companies = Collections.emptyList();
     private Company selectedCompany;
     private boolean selectedCompanyPrinted;
-    private List<Car> cars = Collections.emptyList();
-    private Car selectedCar;
     private List<Customer> customers = Collections.emptyList();
     private Customer selectedCustomer;
 
@@ -53,19 +51,12 @@ public class CurrentStateDataFacade {
         return result;
     }
 
-    public List<Car> getCars() {
-        if (cars.isEmpty()) {
-            cars = carDao.getCarsByCompanyId(selectedCompany.getId());
-        }
-        return cars;
+    public List<Car> getCars(boolean includeRented) {
+        return carDao.getCarsByCompany(selectedCompany.getId(), includeRented);
     }
 
     public void saveCar(String carName) {
         carDao.saveCar(new Car(0, carName, selectedCompany.getId()));
-    }
-
-    public void flushCars() {
-        cars = Collections.emptyList();
     }
 
     public List<Customer> getCustomers() {
@@ -101,17 +92,13 @@ public class CurrentStateDataFacade {
         selectedCustomer.setCarId(0);
     }
 
-    public void setSelectedCar(int choice) {
-        selectedCar = selectItemByIndex(cars, choice);
+    public Car getSelectedCar(List<Car> cars, int choice) {
+        return selectItemByIndex(cars, choice);
     }
 
-    public String getSelectedCarName() {
-        return selectedCar == null ? "" : selectedCar.getName();
-    }
-
-    public void rentCar() {
-        customerDao.rentCar(selectedCustomer.getId(), selectedCar.getId());
-        selectedCustomer.setCarId(selectedCar.getId());
+    public void rentCar(int carId) {
+        customerDao.rentCar(selectedCustomer.getId(), carId);
+        selectedCustomer.setCarId(carId);
     }
 
     private <T> T selectItemByIndex(List<T> items, int choice) {

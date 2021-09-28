@@ -18,9 +18,9 @@ public class Main {
     }
 
     private static CurrentStateDataFacade getMemoryDataFacade() {
-        final CompanyDaoMemory companyDao = new CompanyDaoMemory();
-        final CarDaoMemory carDao = new CarDaoMemory();
+        final CompanyDao companyDao = new CompanyDaoMemory();
         final CustomerDao customerDao = new CustomerDaoMemory();
+        final CarDaoMemory carDao = new CarDaoMemory(customerDao);
         return new CurrentStateDataFacade(companyDao, carDao, customerDao);
     }
 

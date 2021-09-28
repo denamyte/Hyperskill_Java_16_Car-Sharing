@@ -17,7 +17,13 @@ public class CarDaoH2 extends BaseDao implements CarDao {
                     "REFERENCES COMPANY(ID));";
     public static final String COMPANY_CARS_SQL =
             "SELECT ID, NAME FROM CAR " +
-                    "WHERE COMPANY_ID = ?";
+                    "WHERE COMPANY_ID = ?;";
+    public static final String COMPANY_CARS_WITHOUT_RENTED_SQL =
+            "SELECT ID, NAME FROM CAR " +
+                    "WHERE COMPANY_ID = ? " +
+                    "  AND ID NOT IN (SELECT RENTED_CAR_ID " +
+                    "                 FROM CUSTOMER " +
+                    "                 WHERE RENTED_CAR_ID IS NOT NULL);";
     public static final String SAVE_CAR_SQL =
             "INSERT INTO CAR(NAME, COMPANY_ID) VALUES(?, ?)";
     public static final String GET_CAR_BY_ID_SQL =
@@ -36,12 +42,10 @@ public class CarDaoH2 extends BaseDao implements CarDao {
     }
 
     @Override
-    public List<Car> getCarsByCompanyId(int companyId) {
-
-        // TODO: 9/27/21 The cars returned shouldn't be rented by a customer (some JOIN with CUSTOMER table needed)
-
+    public List<Car> getCarsByCompany(int companyId, boolean includeRented) {
+        String sql = includeRented ? COMPANY_CARS_SQL : COMPANY_CARS_WITHOUT_RENTED_SQL;
         List<Car> cars = new LinkedList<>();
-        try (PreparedStatement stmt = conn.prepareStatement(COMPANY_CARS_SQL)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, companyId);
             final ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
